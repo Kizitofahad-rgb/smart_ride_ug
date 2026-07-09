@@ -1,158 +1,235 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _floatController;
+
+  @override
+  void initState() {
+    super.initState();
+    _floatController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _floatController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Smart Ride UG'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // 1. REAL BUS LOGO (Your image)
-              _buildLogo(),
-              const SizedBox(height: 16),
-
-              // 2. DYNAMIC WELCOME TEXT
-              _buildWelcomeText(),
-              const SizedBox(height: 40),
-
-              // 3. PRIMARY GUEST BUTTON (Big, Blue)
-              _buildGuestButton(context),
-              const SizedBox(height: 12),
-
-              // 4. SECONDARY SIGN-IN OPTION (Small text)
-              _buildSignInOption(context),
-              const SizedBox(height: 40),
-
-              // 5. HIDDEN OPERATOR ACCESS (Subtle & safe)
-              _buildOperatorAccess(context),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF0A0E1A), // Deep Navy
+              const Color(0xFF1A1A3A), // Dark Purple
             ],
           ),
         ),
-      ),
-    );
-  }
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // --- 1. Floating Logo (Faux 3D effect) ---
+                AnimatedBuilder(
+                  animation: _floatController,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0, 8 * _floatController.value),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue.shade900.withOpacity(0.6),
+                              blurRadius: 40,
+                              spreadRadius: 10,
+                            ),
+                          ],
+                        ),
+                        child: Image.asset(
+                          'assets/images/bus_logo.png',
+                          height: 140,
+                          width: 140,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
 
-  // ========== 1. LOGO WIDGET ==========
-  Widget _buildLogo() {
-    return Image.asset(
-      'assets/images/bus_logo.png',
-      width: 150,
-      height: 150,
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) {
-        // Fallback in case image is missing
-        return Container(
-          width: 150,
-          height: 150,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(Icons.directions_bus, size: 80, color: Colors.blue),
-        );
-      },
-    );
-  }
+                // --- 2. App Title ---
+                const Text(
+                  'Smart Ride UG',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.5,
+                  ),
+                ).animate().fade(duration: 600.ms).slideY(begin: 0.2, end: 0),
+                const SizedBox(height: 8),
+                const Text(
+                      'Safe. Fast. Reliable.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        letterSpacing: 2,
+                      ),
+                    )
+                    .animate()
+                    .fade(duration: 600.ms, delay: 200.ms)
+                    .slideY(begin: 0.2, end: 0),
+                const SizedBox(height: 60),
 
-  // ========== 2. WELCOME TEXT ==========
-  Widget _buildWelcomeText() {
-    return const Column(
-      children: [
-        Text(
-          'Welcome, Guest!',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 4),
-        Text(
-          'Where are you heading today?',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-      ],
-    );
-  }
+                // --- 3. Glass-Morphism Cards ---
+                _buildNavigationCard(
+                      context,
+                      icon: Icons.person_outline,
+                      title: 'Ride as Guest',
+                      subtitle: 'Find buses instantly, no sign-up',
+                      onTap: () => context.push('/passenger-home'),
+                      isPrimary: true,
+                    )
+                    .animate()
+                    .fade(duration: 600.ms, delay: 400.ms)
+                    .slideY(begin: 0.3, end: 0),
 
-  // ========== 3. GUEST MODE (Primary Action) ==========
-  Widget _buildGuestButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        onPressed: () {
-          // TODO: Navigate to Passenger Map (Guest Mode)
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('🚍 Entering Passenger Portal as Guest...'),
-              duration: Duration(seconds: 2),
+                const SizedBox(height: 16),
+
+                _buildNavigationCard(
+                      context,
+                      icon: Icons.bookmark_border,
+                      title: 'Sign In',
+                      subtitle: 'Access saved routes & history',
+                      onTap: () => context.push('/profile'),
+                      isPrimary: false,
+                    )
+                    .animate()
+                    .fade(duration: 600.ms, delay: 600.ms)
+                    .slideY(begin: 0.3, end: 0),
+
+                const SizedBox(height: 40),
+
+                // --- 4. Hidden Operator Access (Subtle) ---
+                GestureDetector(
+                  onTap: () => context.push('/operator-login'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                    ),
+                    child: const Text(
+                      '🔧 Staff Access',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                ).animate().fade(duration: 600.ms, delay: 800.ms),
+                const SizedBox(height: 20),
+              ],
             ),
-          );
-        },
-        child: const Text(
-          '🚍 Find My Bus (Guest)',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
         ),
       ),
     );
   }
 
-  // ========== 4. SIGN-IN OPTION (Subtle) ==========
-  Widget _buildSignInOption(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        // TODO: Navigate to Login/Signup
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('📝 Opening Sign In...'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      },
-      child: const Text(
-        'Sign in for saved routes & trip history',
-        style: TextStyle(fontSize: 14, color: Colors.grey),
-      ),
-    );
-  }
-
-  // ========== 5. HIDDEN OPERATOR ACCESS (Secure & Subtle) ==========
-  Widget _buildOperatorAccess(BuildContext context) {
+  Widget _buildNavigationCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    required bool isPrimary,
+  }) {
     return GestureDetector(
-      onTap: () {
-        // TODO: Navigate to Operator Login (hidden)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🔐 Operator Access Triggered'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      },
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(20),
+          color: isPrimary
+              ? const Color(0xFF2563EB) // Primary Blue
+              : Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: isPrimary
+              ? null
+              : Border.all(color: Colors.white.withOpacity(0.1)),
+          boxShadow: isPrimary
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withOpacity(0.4),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ]
+              : null,
         ),
-        child: const Text(
-          '🔧 Staff Access',
-          style: TextStyle(fontSize: 12, color: Colors.grey),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isPrimary ? Colors.white : Colors.grey.shade300,
+              size: 28,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: isPrimary ? Colors.white : Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: isPrimary
+                          ? Colors.white.withOpacity(0.8)
+                          : Colors.grey.shade500,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: isPrimary ? Colors.white : Colors.grey.shade500,
+              size: 16,
+            ),
+          ],
         ),
       ),
     );
