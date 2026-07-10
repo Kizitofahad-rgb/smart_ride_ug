@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'route_layer_manager.dart';
 
 class LiveMapScreen extends StatefulWidget {
   const LiveMapScreen({super.key});
@@ -10,10 +10,43 @@ class LiveMapScreen extends StatefulWidget {
 }
 
 class _LiveMapScreenState extends State<LiveMapScreen> {
-  final MapController _mapController = MapController();
+  GoogleMapController? _mapController;
 
-  final LatLng _kampalaCenter = const LatLng(0.3292, 32.5711);
+  static const LatLng _kampalaCenter = LatLng(0.3292, 32.5711);
   double _currentZoom = 15.0;
+
+  static const String _darkMapStyle = '''
+  [
+    {"elementType": "geometry", "stylers": [{"color": "#0F172A"}]},
+    {"elementType": "labels.text.stroke", "stylers": [{"color": "#0F172A"}]},
+    {"elementType": "labels.text.fill", "stylers": [{"color": "#8ec3b9"}]},
+    {"featureType": "road", "elementType": "geometry", "stylers": [{"color": "#1E293B"}]},
+    {"featureType": "water", "elementType": "geometry", "stylers": [{"color": "#0b1a2b"}]},
+    {"featureType": "poi", "stylers": [{"visibility": "off"}]}
+  ]
+  ''';
+
+  Set<Marker> get _markers => {
+    const Marker(
+      markerId: MarkerId('bus_current_position'),
+      position: _kampalaCenter,
+      icon: BitmapDescriptor.defaultMarker,
+    ),
+    ...RouteLayerManager.buildStationMarkers(
+      onStationTap: (name) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(name)),
+        );
+      },
+    ),
+  };
+
+  Future<void> _zoomBy(double delta) async {
+    _currentZoom = (_currentZoom + delta).clamp(12.0, 18.0);
+    await _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(_kampalaCenter, _currentZoom),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,77 +54,29 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
       backgroundColor: const Color(0xFF0F172A),
       body: Stack(
         children: [
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter:
-                  _kampalaCenter, // ← Changed from 'center' to 'initialCenter'
-              initialZoom:
-                  _currentZoom, // ← Changed from 'zoom' to 'initialZoom'
-              minZoom: 12.0,
-              maxZoom: 18.0,
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: _kampalaCenter,
+              zoom: _currentZoom,
             ),
-            children: [
-              TileLayer(
-                urlTemplate:
-                    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                subdomains: const ['a', 'b', 'c', 'd'],
-              ),
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: _kampalaCenter,
-                    width: 40.0,
-                    height: 40.0,
-                    child: Container(
-                      // ← Changed from 'builder' to 'child'
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2563EB).withValues(
-                          alpha: 0.2,
-                        ), // ← Fixed deprecated withOpacity
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFF10B981),
-                          width: 2,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.directions_bus,
-                        color: Color(0xFF2563EB),
-                        size: 22.0,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            minMaxZoomPreference: const MinMaxZoomPreference(12.0, 18.0),
+            style: _darkMapStyle,
+            markers: _markers,
+            polylines: RouteLayerManager.buildRoutePolylines(),
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            onMapCreated: (controller) {
+              _mapController = controller;
+            },
           ),
           Positioned(
             bottom: 24.0,
             right: 16.0,
             child: Column(
               children: [
-                _buildZoomButton(
-                  icon: Icons.add,
-                  onPressed: () {
-                    _currentZoom = (_currentZoom + 1).clamp(12.0, 18.0);
-                    _mapController.move(
-                      _kampalaCenter,
-                      _currentZoom,
-                    ); // ← Fixed: move takes (center, zoom)
-                  },
-                ),
+                _buildZoomButton(icon: Icons.add, onPressed: () => _zoomBy(1)),
                 const SizedBox(height: 8),
-                _buildZoomButton(
-                  icon: Icons.remove,
-                  onPressed: () {
-                    _currentZoom = (_currentZoom - 1).clamp(12.0, 18.0);
-                    _mapController.move(
-                      _kampalaCenter,
-                      _currentZoom,
-                    ); // ← Fixed: move takes (center, zoom)
-                  },
-                ),
+                _buildZoomButton(icon: Icons.remove, onPressed: () => _zoomBy(-1)),
               ],
             ),
           ),
@@ -114,9 +99,7 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(
-                alpha: 0.3,
-              ), // ← Fixed deprecated withOpacity
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RouteLayerManager {
   // Simulating route sequence from Kampala Center through Wandegeya to Makerere Main Gate
@@ -13,51 +12,35 @@ class RouteLayerManager {
     ];
   }
 
-  static PolylineLayer buildRouteLayer() {
-    return PolylineLayer(
-      polylines: [
-        Polyline(
-          points: getMainRouteCoordinates(),
-          strokeWidth: 4.0,
-          color: const Color(0xFF2563EB), // Primary Accent Blue
-          // 'isFilled' is removed in newer versions, default is false
-        ),
-      ],
-    );
+  static Set<Polyline> buildRoutePolylines() {
+    return {
+      Polyline(
+        polylineId: const PolylineId('main_route'),
+        points: getMainRouteCoordinates(),
+        width: 4,
+        color: const Color(0xFF2563EB), // Primary Accent Blue
+      ),
+    };
   }
 
-  static MarkerLayer buildStationMarkers({
-    required Function(String) onStationTap,
+  static Set<Marker> buildStationMarkers({
+    required void Function(String) onStationTap,
   }) {
     final stations = [
       {"name": "Wandegeya Stop", "lat": 0.3220, "lng": 32.5760},
       {"name": "Makerere Gate Hub", "lat": 0.3292, "lng": 32.5711},
     ];
 
-    return MarkerLayer(
-      markers: stations.map((station) {
-        return Marker(
-          point: LatLng(station["lat"] as double, station["lng"] as double),
-          width: 30.0,
-          height: 30.0,
-          child: GestureDetector(
-            // ← Changed from 'builder' to 'child'
-            onTap: () => onStationTap(station["name"] as String),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF64748B), width: 1.5),
-              ),
-              child: const Icon(
-                Icons.directions_bus_filled,
-                color: Color(0xFF64748B),
-                size: 16.0,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
+    return stations.map((station) {
+      final name = station["name"] as String;
+      return Marker(
+        markerId: MarkerId(name),
+        position: LatLng(station["lat"] as double, station["lng"] as double),
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueAzure,
+        ),
+        onTap: () => onStationTap(name),
+      );
+    }).toSet();
   }
 }
