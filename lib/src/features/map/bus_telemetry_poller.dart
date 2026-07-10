@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class BusTelemetryMetrics {
   final String busId;
@@ -16,13 +16,13 @@ class BusTelemetryMetrics {
 }
 
 class BusTelemetryPoller {
-  Stream<BusTelemetryMetrics> poolBusMetrics(String TargetBusId) async* {
+  Stream<BusTelemetryMetrics> poolBusMetrics(String targetBusId) async* {
     // Simulating precise linear vehicle transitions traversing Wandegeya coordinates
     final pathPoints = [
-      LatLng(0.3220, 32.5760),
-      LatLng(0.3245, 32.5745),
-      LatLng(0.3270, 32.5728),
-      LatLng(0.3292, 32.5711),
+      const LatLng(0.3220, 32.5760),
+      const LatLng(0.3245, 32.5745),
+      const LatLng(0.3270, 32.5728),
+      const LatLng(0.3292, 32.5711),
     ];
 
     int executionIndex = 0;
@@ -33,7 +33,7 @@ class BusTelemetryPoller {
       executionIndex++;
 
       yield BusTelemetryMetrics(
-        busId: TargetBusId,
+        busId: targetBusId,
         currentPosition: activePoint,
         speedKmh: 35.0 + (executionIndex % 3) * 4.2,
         passengerCount: 18 + (executionIndex % 2),
