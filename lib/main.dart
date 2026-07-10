@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'src/routing/app_router.dart'; // <-- This connects the Engine to the GPS
+import 'src/features/home/home_screen.dart';
 
 void main() {
   runApp(const SmartRideApp());
@@ -10,15 +10,18 @@ class SmartRideApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    return MaterialApp(
       title: 'Smart Ride UG',
       theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: const Color(0xFF2563EB),
-        scaffoldBackgroundColor: const Color(0xFF0A0E1A),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFF7B500),
+          brightness: Brightness.dark,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF07111F),
+        fontFamily: 'Roboto',
         useMaterial3: true,
       ),
-      routerConfig: appRouter, // <-- This plugs the GPS into the car
+      home: const HomeScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
