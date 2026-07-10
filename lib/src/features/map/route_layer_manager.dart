@@ -20,16 +20,18 @@ class RouteLayerManager {
           points: getMainRouteCoordinates(),
           strokeWidth: 4.0,
           color: const Color(0xFF2563EB), // Primary Accent Blue
-          isFilled: false,
+          // 'isFilled' is removed in newer versions, default is false
         ),
       ],
     );
   }
 
-  static MarkerLayer buildStationMarkers({required Function(String) onStationTap}) {
+  static MarkerLayer buildStationMarkers({
+    required Function(String) onStationTap,
+  }) {
     final stations = [
       {"name": "Wandegeya Stop", "lat": 0.3220, "lng": 32.5760},
-      {"name": "Makerere Gate Hub", "lat": 0.3292, "lng": 32.5711}
+      {"name": "Makerere Gate Hub", "lat": 0.3292, "lng": 32.5711},
     ];
 
     return MarkerLayer(
@@ -38,7 +40,8 @@ class RouteLayerManager {
           point: LatLng(station["lat"] as double, station["lng"] as double),
           width: 30.0,
           height: 30.0,
-          builder: (ctx) => GestureDetector(
+          child: GestureDetector(
+            // ← Changed from 'builder' to 'child'
             onTap: () => onStationTap(station["name"] as String),
             child: Container(
               decoration: BoxDecoration(
@@ -48,7 +51,7 @@ class RouteLayerManager {
               ),
               child: const Icon(
                 Icons.directions_bus_filled,
-                color: const Color(0xFF64748B),
+                color: Color(0xFF64748B),
                 size: 16.0,
               ),
             ),
