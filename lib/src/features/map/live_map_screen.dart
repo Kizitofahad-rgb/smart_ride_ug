@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+
 import 'route_layer_manager.dart';
 
 class LiveMapScreen extends StatefulWidget {
@@ -10,42 +12,14 @@ class LiveMapScreen extends StatefulWidget {
 }
 
 class _LiveMapScreenState extends State<LiveMapScreen> {
-  GoogleMapController? _mapController;
+  final MapController _mapController = MapController();
 
   static const LatLng _kampalaCenter = LatLng(0.3292, 32.5711);
   double _currentZoom = 15.0;
 
-  static const String _darkMapStyle = '''
-  [
-    {"elementType": "geometry", "stylers": [{"color": "#0F172A"}]},
-    {"elementType": "labels.text.stroke", "stylers": [{"color": "#0F172A"}]},
-    {"elementType": "labels.text.fill", "stylers": [{"color": "#8ec3b9"}]},
-    {"featureType": "road", "elementType": "geometry", "stylers": [{"color": "#1E293B"}]},
-    {"featureType": "water", "elementType": "geometry", "stylers": [{"color": "#0b1a2b"}]},
-    {"featureType": "poi", "stylers": [{"visibility": "off"}]}
-  ]
-  ''';
-
-  Set<Marker> get _markers => {
-    const Marker(
-      markerId: MarkerId('bus_current_position'),
-      position: _kampalaCenter,
-      icon: BitmapDescriptor.defaultMarker,
-    ),
-    ...RouteLayerManager.buildStationMarkers(
-      onStationTap: (name) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(name)),
-        );
-      },
-    ),
-  };
-
-  Future<void> _zoomBy(double delta) async {
+  void _zoomBy(double delta) {
     _currentZoom = (_currentZoom + delta).clamp(12.0, 18.0);
-    await _mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(_kampalaCenter, _currentZoom),
-    );
+    _mapController.move(_mapController.camera.center, _currentZoom);
   }
 
   @override
@@ -54,20 +28,47 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
       backgroundColor: const Color(0xFF0F172A),
       body: Stack(
         children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: _kampalaCenter,
-              zoom: _currentZoom,
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _kampalaCenter,
+              initialZoom: _currentZoom,
+              minZoom: 12.0,
+              maxZoom: 18.0,
             ),
-            minMaxZoomPreference: const MinMaxZoomPreference(12.0, 18.0),
-            style: _darkMapStyle,
-            markers: _markers,
-            polylines: RouteLayerManager.buildRoutePolylines(),
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            onMapCreated: (controller) {
-              _mapController = controller;
-            },
+            children: [
+              // CartoDB Dark Matter tiles — free, no API key, matches the
+              // app's dark theme. Swap the urlTemplate below for standard
+              // OSM tiles ('https://tile.openstreetmap.org/{z}/{x}/{y}.png')
+              // if you'd rather use the default light OSM style.
+              TileLayer(
+                urlTemplate:
+                'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                subdomains: const ['a', 'b', 'c', 'd'],
+                userAgentPackageName: 'com.mhl.smart_ride_ug',
+                maxZoom: 20,
+              ),
+              RouteLayerManager.buildRoutePolylineLayer(),
+              RouteLayerManager.buildStationMarkerLayer(
+                onStationTap: (name) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(name)),
+                  );
+                },
+              ),
+              MarkerLayer(
+                markers: [
+                  RouteLayerManager.buildBusMarker(_kampalaCenter),
+                ],
+              ),
+              // Required attribution when using OSM/CartoDB tiles.
+              const RichAttributionWidget(
+                attributions: [
+                  TextSourceAttribution('OpenStreetMap contributors'),
+                  TextSourceAttribution('CARTO'),
+                ],
+              ),
+            ],
           ),
           Positioned(
             bottom: 24.0,
