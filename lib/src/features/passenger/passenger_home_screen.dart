@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'booking_screen.dart';
 import 'trip_history_screen.dart';
 import 'profile_screen.dart';
+import '../map/live_map_screen.dart';
 
 class PassengerHomeScreen extends StatelessWidget {
   const PassengerHomeScreen({Key? key}) : super(key: key);
@@ -41,7 +42,12 @@ class PassengerHomeScreen extends StatelessWidget {
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LiveMapScreen()),
+                        );
+                      },
                       child: const Text('Find My Bus', style: TextStyle(color: Colors.white)),
                     ),
                     const SizedBox(height: 12),
