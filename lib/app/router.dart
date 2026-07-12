@@ -4,7 +4,7 @@ import '../features/authentication/presentation/pages/login_page.dart';
 import '../features/authentication/presentation/pages/register_page.dart';
 import '../features/authentication/presentation/pages/splash_page.dart';
 import '../features/authentication/presentation/pages/welcome_page.dart';
-import '../features/home/presentation/pages/home_page.dart';
+import 'main_shell.dart';
 
 class AppRouter {
   AppRouter._();
@@ -39,7 +39,7 @@ class AppRouter {
 
       case home:
         return MaterialPageRoute(
-          builder: (_) => const HomePage(),
+          builder: (_) => const MainShell(),
         );
 
       default:
