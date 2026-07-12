@@ -1,18 +1,21 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/dummy_bus_stops.dart';
+import '../../domain/repositories/bus_stops_repository.dart';
 import 'bus_stops_event.dart';
 import 'bus_stops_state.dart';
 
 /// Manages the state of the bus stop list.
 ///
-/// Same pattern as `RoutesBloc` — reads `dummyBusStops` directly for
-/// now, will be pointed at a repository once Firebase (Step 6) is
-/// introduced (ADR-007).
+/// Depends on `BusStopsRepository` (an interface), matching the
+/// pattern in `RoutesBloc`.
 class BusStopsBloc extends Bloc<BusStopsEvent, BusStopsState> {
-  BusStopsBloc() : super(const BusStopsState()) {
+  BusStopsBloc({required BusStopsRepository repository})
+      : _repository = repository,
+        super(const BusStopsState()) {
     on<LoadBusStops>(_onLoadBusStops);
   }
+
+  final BusStopsRepository _repository;
 
   Future<void> _onLoadBusStops(
       LoadBusStops event,
@@ -21,11 +24,11 @@ class BusStopsBloc extends Bloc<BusStopsEvent, BusStopsState> {
     emit(state.copyWith(status: BusStopsStatus.loading));
 
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
+      final busStops = await _repository.fetchBusStops();
 
       emit(state.copyWith(
         status: BusStopsStatus.loaded,
-        busStops: dummyBusStops,
+        busStops: busStops,
       ));
     } catch (_) {
       emit(state.copyWith(

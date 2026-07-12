@@ -7,6 +7,12 @@ abstract class SearchEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Requests the full destination list be loaded, so it can be
+/// filtered locally as the passenger types.
+class LoadDestinations extends SearchEvent {
+  const LoadDestinations();
+}
+
 /// Fired as the passenger types in the search field.
 class SearchQueryChanged extends SearchEvent {
   const SearchQueryChanged(this.query);

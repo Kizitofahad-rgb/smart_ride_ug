@@ -1,22 +1,24 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/dummy_routes.dart';
+import '../../domain/repositories/routes_repository.dart';
 import 'routes_event.dart';
 import 'routes_state.dart';
 
 /// Manages the state of the route list.
 ///
-/// `_onLoadRoutes` reads directly from `dummyRoutes` for now. Per
-/// ADR-007, the Repository Layer is introduced as its own later
-/// step, so this BLoC intentionally does NOT go through a repository
-/// yet. When Step 6 (Firebase) begins, only the body of
-/// `_onLoadRoutes` needs to change to call something like
-/// `RoutesRepository.fetchRoutes()` — the event/state contract, and
-/// every widget depending on it, stays the same.
+/// Depends on `RoutesRepository` (an interface), not on any
+/// concrete data source. Right now `DummyRoutesRepository` is
+/// injected wherever this BLoC is created; swapping in a
+/// Firestore-backed repository later means changing that one
+/// injection site, not this class.
 class RoutesBloc extends Bloc<RoutesEvent, RoutesState> {
-  RoutesBloc() : super(const RoutesState()) {
+  RoutesBloc({required RoutesRepository repository})
+      : _repository = repository,
+        super(const RoutesState()) {
     on<LoadRoutes>(_onLoadRoutes);
   }
+
+  final RoutesRepository _repository;
 
   Future<void> _onLoadRoutes(
       LoadRoutes event,
@@ -25,11 +27,11 @@ class RoutesBloc extends Bloc<RoutesEvent, RoutesState> {
     emit(state.copyWith(status: RoutesStatus.loading));
 
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
+      final routes = await _repository.fetchRoutes();
 
       emit(state.copyWith(
         status: RoutesStatus.loaded,
-        routes: dummyRoutes,
+        routes: routes,
       ));
     } catch (_) {
       emit(state.copyWith(
