@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 // Home Screen
-import '../features/home/home_screen.dart';
+import '../../features/home/presentation/pages/home_page.dart';
 
 // Passenger Flow (Mable) - MAKE SURE THESE PATHS ARE CORRECT
 import '../features/passenger/passenger_home_screen.dart';
