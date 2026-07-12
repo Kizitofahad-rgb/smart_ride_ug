@@ -14,6 +14,8 @@ dependencies:
   flutter_animate: ^4.5.0     # Premium animations
   flutter_map: ^8.3.1         # Map functionality (OpenStreetMap)
   latlong2: ^0.10.1
+  flutter_bloc: ^9.1.1        # State management (ADR-002)
+  equatable: 2.1.0           # Value equality for BLoC events/states
 
 dev_dependencies:
   flutter_test:

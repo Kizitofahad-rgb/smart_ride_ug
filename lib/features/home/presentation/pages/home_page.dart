@@ -6,6 +6,8 @@ import '../widgets/home_header.dart';
 import '../widgets/map_placeholder.dart';
 import '../widgets/nearby_stop_card.dart';
 import '../widgets/quick_action_card.dart';
+import '../../../routes/presentation/pages/routes_page.dart';
+import '../../../bus_stops/presentation/pages/bus_stops_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -98,9 +100,16 @@ class HomePage extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.md),
                   QuickActionCard(
-                    icon: Icons.directions_bus,
-                    title: "Track Bus",
-                    onTap: () {},
+                    icon: Icons.location_on,
+                    title: "Bus Stops",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const BusStopsPage(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

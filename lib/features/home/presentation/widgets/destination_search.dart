@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../search/presentation/pages/destination_search_page.dart';
+
 class DestinationSearch extends StatelessWidget {
   const DestinationSearch({super.key});
 
@@ -13,8 +15,12 @@ class DestinationSearch extends StatelessWidget {
         suffixIcon: const Icon(Icons.arrow_forward_ios, size: 18),
       ),
       onTap: () {
-        // TODO:
-        // Navigate to Search Destination Screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const DestinationSearchPage(),
+          ),
+        );
       },
     );
   }
