@@ -1,3 +1,4 @@
+import 'dart:async'; // <-- THIS FIXES THE "Timer" ERROR!
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,42 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _floatController;
 
+  // --- NEW: Secret Tap Logic ---
+  int _tapCounter = 0;
+  Timer? _tapTimer;
+
+  void _handleLogoTap() {
+    // Cancel the previous timer if it exists (so taps reset the timer)
+    _tapTimer?.cancel();
+
+    // Increment the counter
+    _tapCounter++;
+
+    // If we hit 5 taps, navigate to Operator Login!
+    if (_tapCounter >= 5) {
+      // Reset the counter
+      _tapCounter = 0;
+      // Navigate using GoRouter
+      context.push('/operator-login');
+
+      // Show a subtle haptic feedback or snackbar (optional)
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('🔐 Operator Access Granted'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    } else {
+      // If we haven't hit 5 yet, set a timer to reset the counter
+      // If the user stops tapping for 1 second, the count resets to 0.
+      _tapTimer = Timer(const Duration(seconds: 1), () {
+        setState(() {
+          _tapCounter = 0;
+        });
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -25,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     _floatController.dispose();
+    _tapTimer?.cancel(); // Clean up the timer when the screen is destroyed
     super.dispose();
   }
 
@@ -48,33 +86,36 @@ class _HomeScreenState extends State<HomeScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // --- 1. Floating Logo (Faux 3D effect) ---
-                AnimatedBuilder(
-                  animation: _floatController,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 8 * _floatController.value),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.blue.shade900.withValues(
-                                alpha: 0.6,
+                // --- 1. SECRET TAP LOGO (Now wrapped with GestureDetector) ---
+                GestureDetector(
+                  onTap: _handleLogoTap, // <-- The magic happens here!
+                  child: AnimatedBuilder(
+                    animation: _floatController,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, 8 * _floatController.value),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.shade900.withValues(
+                                  alpha: 0.6,
+                                ),
+                                blurRadius: 40,
+                                spreadRadius: 10,
                               ),
-                              blurRadius: 40,
-                              spreadRadius: 10,
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Image.asset(
+                            'assets/images/bus_logo.png',
+                            height: 140,
+                            width: 140,
+                          ),
                         ),
-                        child: Image.asset(
-                          'assets/images/bus_logo.png',
-                          height: 140,
-                          width: 140,
-                        ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
                 const SizedBox(height: 24),
 
@@ -129,33 +170,9 @@ class _HomeScreenState extends State<HomeScreen>
                     .fade(duration: 600.ms, delay: 600.ms)
                     .slideY(begin: 0.3, end: 0),
 
-                const SizedBox(height: 40),
-
-                // --- 4. Hidden Operator Access (Subtle) ---
-                GestureDetector(
-                  onTap: () => context.push('/operator-login'),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: const Text(
-                      '🔧 Staff Access',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ).animate().fade(duration: 600.ms, delay: 800.ms),
+                // --- 4. OPERATOR ACCESS IS COMPLETELY REMOVED FROM HERE ---
+                // The visible "🔧 Staff Access" text is GONE.
+                // Only the Secret Tap on the logo can open the Operator Portal.
                 const SizedBox(height: 20),
               ],
             ),
