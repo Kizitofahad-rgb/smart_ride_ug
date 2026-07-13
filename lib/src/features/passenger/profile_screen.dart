@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Simulated user data - replace with real data later
+    final String userName = "Mable";
+    final String userEmail = "mable@smartride.com";
+    final String userPhone = "+256 700 123 456";
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(color: Colors.white)),
+        title: const Text('My Profile', style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF1E293B),
         elevation: 0,
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
