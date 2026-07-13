@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../data/repositories/dummy_bus_stops_repository.dart';
 import '../bloc/bus_stops_bloc.dart';
 import '../bloc/bus_stops_event.dart';
 import '../bloc/bus_stops_state.dart';
@@ -18,7 +19,8 @@ class BusStopsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => BusStopsBloc()..add(const LoadBusStops()),
+      create: (_) => BusStopsBloc(repository: DummyBusStopsRepository())
+        ..add(const LoadBusStops()),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Bus Stops'),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../data/repositories/dummy_routes_repository.dart';
 import '../bloc/routes_bloc.dart';
 import '../bloc/routes_event.dart';
 import '../bloc/routes_state.dart';
@@ -20,7 +21,8 @@ class RoutesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => RoutesBloc()..add(const LoadRoutes()),
+      create: (_) => RoutesBloc(repository: DummyRoutesRepository())
+        ..add(const LoadRoutes()),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Routes'),

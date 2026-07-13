@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../widgets/destination_search.dart';
 import '../widgets/home_header.dart';
-import '../widgets/map_placeholder.dart';
+import '../widgets/home_map.dart';
 import '../widgets/nearby_stop_card.dart';
 import '../widgets/quick_action_card.dart';
 import '../../../routes/presentation/pages/routes_page.dart';
@@ -29,7 +29,7 @@ class HomePage extends StatelessWidget {
 
               const SizedBox(height: AppSpacing.lg),
 
-              const MapPlaceholder(),
+              const HomeMap(),
 
               const SizedBox(height: AppSpacing.xl),
 

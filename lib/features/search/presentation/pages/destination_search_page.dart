@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../routes/data/repositories/dummy_routes_repository.dart';
 import '../../../routes/presentation/pages/route_details_page.dart';
 import '../../../routes/presentation/widgets/route_card.dart';
+import '../../data/repositories/dummy_destinations_repository.dart';
 import '../bloc/search_bloc.dart';
 import '../bloc/search_event.dart';
 import '../bloc/search_state.dart';
@@ -24,7 +26,10 @@ class DestinationSearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => SearchBloc(),
+      create: (_) => SearchBloc(
+        destinationsRepository: DummyDestinationsRepository(),
+        routesRepository: DummyRoutesRepository(),
+      )..add(const LoadDestinations()),
       child: const _DestinationSearchView(),
     );
   }
@@ -55,6 +60,17 @@ class _DestinationSearchViewState extends State<_DestinationSearchView> {
       ),
       body: BlocBuilder<SearchBloc, SearchState>(
         builder: (context, state) {
+          if (state.status == SearchStatus.initial ||
+              state.status == SearchStatus.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state.status == SearchStatus.error) {
+            return Center(
+              child: Text(state.errorMessage ?? 'Something went wrong.'),
+            );
+          }
+
           final selected = state.selectedDestinationName;
 
           return Padding(
