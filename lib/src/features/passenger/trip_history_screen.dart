@@ -44,10 +44,7 @@ class TripHistoryScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.directions_bus, color: Colors.grey, size: 60),
                   SizedBox(height: 16),
-                  Text(
-                    'No trips yet',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
-                  ),
+                  Text('No trips yet', style: TextStyle(color: Colors.grey, fontSize: 16)),
                 ],
               ),
             )
@@ -59,9 +56,7 @@ class TripHistoryScreen extends StatelessWidget {
                 final isUpcoming = trip['status'] == 'Upcoming';
                 return Card(
                   color: const Color(0xFF1E293B),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   margin: const EdgeInsets.only(bottom: 12),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -74,49 +69,28 @@ class TripHistoryScreen extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 trip['route'],
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: isUpcoming
-                                    ? const Color(0xFF2563EB)
-                                    : Colors.green[700],
+                                color: isUpcoming ? const Color(0xFF2563EB) : Colors.green[700],
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
                                 trip['status'],
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
+                                style: const TextStyle(color: Colors.white, fontSize: 12),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          trip['date'],
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 13,
-                          ),
-                        ),
+                        Text(trip['date'], style: TextStyle(color: Colors.grey[400], fontSize: 13)),
                         const SizedBox(height: 4),
                         Text(
                           trip['fare'],
-                          style: const TextStyle(
-                            color: Color(0xFF38BDF8),
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: const TextStyle(color: Color(0xFF38BDF8), fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
