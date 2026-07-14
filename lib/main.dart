@@ -25,7 +25,7 @@ class SmartRideApp extends StatelessWidget {
   const SmartRideApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build (BuildContext context) {
     return MaterialApp.router(
       title: 'Smart Ride UG',
       theme: ThemeData(
