@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'data/bus_location.dart';
+
 class RouteLayerManager {
-  // Simulating route sequence from Kampala Center through Wandegeya to Makerere Main Gate
+  // Kampala Central -> Wandegeya -> Makerere Main Gate -> CoCIS Complex.
   static List<LatLng> getMainRouteCoordinates() {
     return const [
       LatLng(0.3136, 32.5811), // Kampala Central Node
@@ -19,7 +21,7 @@ class RouteLayerManager {
         Polyline(
           points: getMainRouteCoordinates(),
           strokeWidth: 4,
-          color: const Color(0xFF2563EB), // Primary Accent Blue
+          color: const Color(0xFF38BDF8), // Bright accent blue, readable on dark tiles
         ),
       ],
     );
@@ -47,15 +49,15 @@ class RouteLayerManager {
             onTap: () => onStationTap(name),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFF1E293B),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFF64748B),
+                  color: const Color(0xFF94A3B8),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
+                    color: Colors.black.withValues(alpha: 0.4),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -63,7 +65,7 @@ class RouteLayerManager {
               ),
               child: const Icon(
                 Icons.directions_bus_filled,
-                color: Color(0xFF475569),
+                color: Color(0xFFCBD5E1),
                 size: 16,
               ),
             ),
@@ -89,26 +91,43 @@ class RouteLayerManager {
     );
   }
 
-  /// The live bus marker: blue circle (20% opacity), green border, blue bus
-  /// glyph. Position updates simply by rebuilding this with a new [position].
-  static Marker buildBusMarker(LatLng position) {
+  /// The live bus marker. Color reflects [status]/[hasArrived] so the
+  /// "arrival" state is visible on the map itself, not just in a banner:
+  /// green = active & en route, amber = arrived, grey = stale/offline.
+  /// Tap handling is left to the caller (wrap in a GestureDetector) so the
+  /// marker itself stays a dumb, reusable piece of UI.
+  static Marker buildBusMarker(
+    LatLng position, {
+    required BusTrackingStatus status,
+    required bool hasArrived,
+    VoidCallback? onTap,
+  }) {
+    final Color borderColor;
+    if (status == BusTrackingStatus.offline) {
+      borderColor = const Color(0xFF64748B); // grey — offline
+    } else if (hasArrived) {
+      borderColor = const Color(0xFFF59E0B); // amber — arrived
+    } else {
+      borderColor = const Color(0xFF10B981); // green — active
+    }
+
     return Marker(
       point: position,
-      width: 40,
-      height: 40,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF2563EB).withValues(alpha: 0.2),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: const Color(0xFF10B981),
-            width: 2,
+      width: 44,
+      height: 44,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+            shape: BoxShape.circle,
+            border: Border.all(color: borderColor, width: 2.5),
           ),
-        ),
-        child: const Icon(
-          Icons.directions_bus,
-          color: Color(0xFF2563EB),
-          size: 22,
+          child: const Icon(
+            Icons.directions_bus,
+            color: Color(0xFF60A5FA),
+            size: 22,
+          ),
         ),
       ),
     );
