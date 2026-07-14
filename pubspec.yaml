@@ -10,12 +10,17 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  go_router: ^17.3.0          # Navigation
-  flutter_animate: ^4.5.0     # Premium animations
-  flutter_map: ^8.3.1         # Map functionality (OpenStreetMap)
+  go_router: ^17.3.0 # Navigation
+  flutter_animate: ^4.5.0 # Premium animations
+  flutter_map: ^8.3.1 # Map functionality (OpenStreetMap)
   latlong2: ^0.10.1
-  flutter_bloc: ^9.1.1        # State management (ADR-002)
-  equatable: 2.1.0           # Value equality for BLoC events/states
+  flutter_bloc: ^9.1.1 # State management (ADR-002)
+  equatable: 2.1.0 # Value equality for BLoC events/states
+
+  # --- FIREBASE DEPENDENCIES ---
+  firebase_core: ^3.3.0 # Firebase Core
+  firebase_auth: ^5.3.0 # Authentication
+  cloud_firestore: ^5.4.0 # Firestore Database
 
 dev_dependencies:
   flutter_test:
