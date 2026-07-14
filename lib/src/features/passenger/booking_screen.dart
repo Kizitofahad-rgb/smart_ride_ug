@@ -73,127 +73,132 @@ class _BookingScreenState extends State<BookingScreen> {
         backgroundColor: const Color(0xFF1E293B),
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Pickup location card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.my_location, color: Color(0xFF38BDF8)),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Old Taxi Park',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Destination card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.location_on, color: Color(0xFF2563EB)),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Makerere University',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Select Your Seat',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Seat selector grid
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _seats.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-              ),
-              itemBuilder: (context, index) {
-                final isOccupied = _occupiedSeats.contains(index);
-                final isSelected = _selectedSeat == index;
-                return GestureDetector(
-                  onTap: isOccupied
-                      ? null
-                      : () {
-                          setState(() {
-                            _selectedSeat = index;
-                          });
-                        },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isOccupied
-                          ? Colors.grey[700]
-                          : isSelected
-                          ? const Color(0xFF2563EB)
-                          : const Color(0xFF1E293B),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isLandscape =
+              MediaQuery.orientationOf(context) == Orientation.landscape;
+          return ListView(
+            padding: const EdgeInsets.all(16.0),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: [
+              // Pickup location card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.my_location, color: Color(0xFF38BDF8)),
+                    SizedBox(width: 12),
+                    Expanded(
                       child: Text(
-                        _seats[index],
-                        style: TextStyle(
-                          color: isOccupied ? Colors.grey[400] : Colors.white,
-                          fontWeight: FontWeight.bold,
+                        'Old Taxi Park',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Destination card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.location_on, color: Color(0xFF2563EB)),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Makerere University',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Select Your Seat',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Seat selector grid
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _seats.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: isLandscape ? 1.35 : 1,
+                ),
+                itemBuilder: (context, index) {
+                  final isOccupied = _occupiedSeats.contains(index);
+                  final isSelected = _selectedSeat == index;
+                  return GestureDetector(
+                    onTap: isOccupied
+                        ? null
+                        : () {
+                            setState(() {
+                              _selectedSeat = index;
+                            });
+                          },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isOccupied
+                            ? Colors.grey[700]
+                            : isSelected
+                            ? const Color(0xFF2563EB)
+                            : const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _seats[index],
+                          style: TextStyle(
+                            color: isOccupied ? Colors.grey[400] : Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              // Book button
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2563EB),
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                );
-              },
-            ),
-            const Spacer(),
-            // Book button
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                ),
+                onPressed: _selectedSeat == null
+                    ? null
+                    : () => _handleBooking(context),
+                child: const Text(
+                  'Confirm Booking',
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
-              onPressed: _selectedSeat == null
-                  ? null
-                  : () => _handleBooking(context),
-              child: const Text(
-                'Confirm Booking',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }

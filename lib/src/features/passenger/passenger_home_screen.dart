@@ -18,113 +18,111 @@ class PassengerHomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
+        child: ListView(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Smart Ride UG',
-                style: AppTextStyles.heading.copyWith(fontSize: 26),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            Text(
+              'Smart Ride UG',
+              style: AppTextStyles.heading.copyWith(fontSize: 26),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isAuthenticated
+                  ? 'Welcome back, $userName'
+                  : 'Browse routes and preview the app as a guest',
+              style: AppTextStyles.caption,
+            ),
+            const SizedBox(height: 30),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(height: 8),
-              Text(
-                isAuthenticated
-                    ? 'Welcome back, $userName'
-                    : 'Browse routes and preview the app as a guest',
-                style: AppTextStyles.caption,
-              ),
-              const SizedBox(height: 30),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LiveMapScreen(),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        'Find My Bus',
-                        style: TextStyle(color: Colors.white),
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LiveMapScreen(),
                         ),
+                      );
+                    },
+                    child: const Text(
+                      'Find My Bus',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      onPressed: () {
-                        if (!AuthService.instance.isAuthenticated) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Please sign in or register to book a seat.',
-                              ),
+                    ),
+                    onPressed: () {
+                      if (!AuthService.instance.isAuthenticated) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please sign in or register to book a seat.',
                             ),
-                          );
-                          context.push('/passenger-login');
-                          return;
-                        }
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const BookingScreen(),
                           ),
                         );
-                      },
-                      child: const Text(
-                        'Book Seat',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        context.push('/passenger-login');
+                        return;
+                      }
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BookingScreen(),
                         ),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const TripHistoryScreen(),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        'Trip History',
-                        style: TextStyle(color: Colors.white),
+                      );
+                    },
+                    child: const Text(
+                      'Book Seat',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ],
-                ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TripHistoryScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Trip History',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(

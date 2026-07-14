@@ -170,33 +170,45 @@ class _OperatorDashboardScreenState extends State<OperatorDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: _stats
-                .map(
-                  (item) => Expanded(
-                    child: CustomCard(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(item['label'], style: AppTextStyles.caption),
-                          const SizedBox(height: 8),
-                          Text(item['value'], style: AppTextStyles.heading),
-                          const SizedBox(height: 8),
-                          StatusBadge(
-                            label: item['badge'],
-                            status: item['badge'] == 'Stable'
-                                ? BadgeStatus.active
-                                : item['badge'] == 'Pending'
-                                ? BadgeStatus.warning
-                                : BadgeStatus.active,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isCompact = constraints.maxWidth < 600;
+              final cardWidth = isCompact
+                  ? (constraints.maxWidth - 12) / 2
+                  : (constraints.maxWidth - 24) / 3;
+
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: _stats
+                    .map(
+                      (item) => SizedBox(
+                        width: cardWidth,
+                        child: CustomCard(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(item['label'], style: AppTextStyles.caption),
+                              const SizedBox(height: 8),
+                              Text(item['value'], style: AppTextStyles.heading),
+                              const SizedBox(height: 8),
+                              StatusBadge(
+                                label: item['badge'],
+                                status: item['badge'] == 'Stable'
+                                    ? BadgeStatus.active
+                                    : item['badge'] == 'Pending'
+                                    ? BadgeStatus.warning
+                                    : BadgeStatus.active,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                )
-                .toList(),
+                    )
+                    .toList(),
+              );
+            },
           ),
           const SizedBox(height: 16),
           CustomCard(
@@ -210,7 +222,6 @@ class _OperatorDashboardScreenState extends State<OperatorDashboardScreen> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
                           child: Text(
@@ -218,6 +229,7 @@ class _OperatorDashboardScreenState extends State<OperatorDashboardScreen> {
                             style: AppTextStyles.body,
                           ),
                         ),
+                        const SizedBox(width: 12),
                         Text(note['time']!, style: AppTextStyles.caption),
                       ],
                     ),
@@ -257,9 +269,11 @@ class _OperatorDashboardScreenState extends State<OperatorDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(bus['id'], style: AppTextStyles.subheading),
+                    Expanded(
+                      child: Text(bus['id'], style: AppTextStyles.subheading),
+                    ),
+                    const SizedBox(width: 12),
                     StatusBadge(
                       label: bus['status'],
                       status: bus['statusType'],
@@ -295,9 +309,14 @@ class _OperatorDashboardScreenState extends State<OperatorDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(request['id'], style: AppTextStyles.subheading),
+                    Expanded(
+                      child: Text(
+                        request['id'],
+                        style: AppTextStyles.subheading,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     StatusBadge(
                       label: request['status'],
                       status: request['statusType'],
@@ -411,11 +430,11 @@ class _OperatorDashboardScreenState extends State<OperatorDashboardScreen> {
             child: CustomCard(
               padding: const EdgeInsets.all(12),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(a['action']!, style: AppTextStyles.body),
                   ),
+                  const SizedBox(width: 12),
                   Text(a['time']!, style: AppTextStyles.caption),
                 ],
               ),
