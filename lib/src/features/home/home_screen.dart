@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen>
                       context,
                       icon: Icons.person_outline,
                       title: 'Ride as Guest',
-                      subtitle: 'Find buses instantly, no sign-up',
+                      subtitle: 'Browse and preview without booking',
                       onTap: () => context.push('/passenger-home'),
                       isPrimary: true,
                     )
@@ -162,8 +162,8 @@ class _HomeScreenState extends State<HomeScreen>
                       context,
                       icon: Icons.bookmark_border,
                       title: 'Sign In',
-                      subtitle: 'Access saved routes & history',
-                      onTap: () => context.push('/profile'),
+                      subtitle: 'Access your passenger account',
+                      onTap: () => context.push('/passenger-login'),
                       isPrimary: false,
                     )
                     .animate()

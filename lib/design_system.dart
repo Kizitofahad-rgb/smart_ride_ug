@@ -107,10 +107,7 @@ class CardWidget extends StatelessWidget {
       elevation: 4,
       margin: const EdgeInsets.all(8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: child,
-      ),
+      child: Padding(padding: const EdgeInsets.all(16), child: child),
     );
   }
 }
@@ -154,10 +151,7 @@ class LoadingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: CircularProgressIndicator(
-        strokeWidth: 3,
-        color: Colors.blue,
-      ),
+      child: CircularProgressIndicator(strokeWidth: 3, color: Colors.blue),
     );
   }
 }
@@ -220,8 +214,10 @@ class StatusBadge extends StatelessWidget {
         color: color.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(status,
-          style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+      child: Text(
+        status,
+        style: TextStyle(color: color, fontWeight: FontWeight.bold),
+      ),
     );
   }
 }

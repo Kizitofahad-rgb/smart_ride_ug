@@ -27,8 +27,9 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/bus_logo.png
+    - assets/icon/Smartride.png
 
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/images/bus_logo.png"
+  image_path: "assets/icon/Smartride.png"
