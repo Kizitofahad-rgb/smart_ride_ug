@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'booking_confirmation_screen.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({Key? key}) : super(key: key);
@@ -11,6 +12,24 @@ class _BookingScreenState extends State<BookingScreen> {
   int? _selectedSeat;
   final List<String> _seats = ['1A', '1B', '1C', '1D', '2A', '2B', '2C', '2D'];
   final List<int> _occupiedSeats = [2, 5]; // example occupied seat indexes
+
+  // Kampala stages/locations for pickup and destination
+  final List<String> _locations = [
+    'Old Taxi Park',
+    'New Taxi Park',
+    'Makerere University',
+    'Wandegeya',
+    'Ntinda',
+    'Kireka',
+    'Bwaise',
+    'Kabalagala',
+    'Kyambogo',
+    'Nakawa',
+    'Kajjansi',
+  ];
+
+  String? _pickupLocation = 'Old Taxi Park';
+  String? _destinationLocation = 'Makerere University';
 
   @override
   Widget build(BuildContext context) {
@@ -26,39 +45,77 @@ class _BookingScreenState extends State<BookingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Pickup location card
+            // Pickup location dropdown
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               decoration: BoxDecoration(
                 color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.my_location, color: Color(0xFF38BDF8)),
-                  SizedBox(width: 12),
+                  const Icon(Icons.my_location, color: Color(0xFF38BDF8)),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Text('Old Taxi Park', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _pickupLocation,
+                        isExpanded: true,
+                        dropdownColor: const Color(0xFF1E293B),
+                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                        icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                        items: _locations.map((location) {
+                          return DropdownMenuItem<String>(
+                            value: location,
+                            child: Text(location),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _pickupLocation = value;
+                          });
+                        },
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 12),
-            // Destination card
+            // Destination dropdown
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               decoration: BoxDecoration(
                 color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.location_on, color: Color(0xFF2563EB)),
-                  SizedBox(width: 12),
+                  const Icon(Icons.location_on, color: Color(0xFF2563EB)),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Text('Makerere University', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _destinationLocation,
+                        isExpanded: true,
+                        dropdownColor: const Color(0xFF1E293B),
+                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                        icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                        items: _locations.map((location) {
+                          return DropdownMenuItem<String>(
+                            value: location,
+                            child: Text(location),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _destinationLocation = value;
+                          });
+                        },
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -113,24 +170,48 @@ class _BookingScreenState extends State<BookingScreen> {
               },
             ),
             const Spacer(),
-            // Book button
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              onPressed: _selectedSeat == null
-                  ? null
-                  : () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Seat ${_seats[_selectedSeat!]} booked successfully!'),
-                          backgroundColor: const Color(0xFF2563EB),
-                        ),
-                      );
+            // Book and Cancel buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      side: const BorderSide(color: Colors.grey),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
                     },
-              child: const Text('Confirm Booking', style: TextStyle(color: Colors.white)),
+                    child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: _selectedSeat == null
+                        ? null
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BookingConfirmationScreen(
+                                  pickupLocation: _pickupLocation ?? '',
+                                  destinationLocation: _destinationLocation ?? '',
+                                  seat: _seats[_selectedSeat!],
+                                ),
+                              ),
+                            );
+                          },
+                    child: const Text('Book', style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
