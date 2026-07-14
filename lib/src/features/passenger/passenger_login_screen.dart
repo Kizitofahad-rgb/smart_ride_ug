@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/services/auth_service.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/custom_card.dart';
 
-class OperatorLoginScreen extends StatefulWidget {
-  const OperatorLoginScreen({super.key});
+class PassengerLoginScreen extends StatefulWidget {
+  const PassengerLoginScreen({super.key});
 
   @override
-  State<OperatorLoginScreen> createState() => _OperatorLoginScreenState();
+  State<PassengerLoginScreen> createState() => _PassengerLoginScreenState();
 }
 
-class _OperatorLoginScreenState extends State<OperatorLoginScreen> {
+class _PassengerLoginScreenState extends State<PassengerLoginScreen> {
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
   bool _isLoading = false;
@@ -34,22 +35,26 @@ class _OperatorLoginScreenState extends State<OperatorLoginScreen> {
   void _handleLogin() {
     setState(() => _isLoading = true);
     Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Login successful!')));
-        if (mounted) {
-          context.go('/operator-dashboard');
-        }
-      }
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      AuthService.instance.signIn(_emailController.text.trim());
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Login successful!')));
+      context.go('/passenger-home');
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundDark,
+      appBar: AppBar(
+        title: const Text('Passenger Sign In'),
+        backgroundColor: AppColors.surfaceDark,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -57,14 +62,15 @@ class _OperatorLoginScreenState extends State<OperatorLoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 32),
-              Text('Operator Login', style: AppTextStyles.heading),
+              Text('Welcome back', style: AppTextStyles.heading),
               const SizedBox(height: 8),
               Text(
-                'Sign in to manage your buses and trips',
+                'Sign in to manage your bookings and trips.',
                 style: AppTextStyles.caption,
               ),
               const SizedBox(height: 40),
               CustomCard(
+                color: AppColors.surfaceDark,
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +80,7 @@ class _OperatorLoginScreenState extends State<OperatorLoginScreen> {
                     TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                        hintText: 'operator@smartride.ug',
+                        hintText: 'you@example.com',
                         hintStyle: AppTextStyles.caption,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -118,8 +124,11 @@ class _OperatorLoginScreenState extends State<OperatorLoginScreen> {
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
-                  onPressed: () => context.go('/operator-register'),
-                  child: const Text('Don\'t have an account? Register now'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                  ),
+                  onPressed: () => context.go('/passenger-register'),
+                  child: const Text('Don\'t have an account? Register'),
                 ),
               ),
             ],

@@ -5,6 +5,8 @@ import '../features/home/home_screen.dart';
 
 // Passenger Flow (Mable)
 import '../features/passenger/passenger_home_screen.dart';
+import '../features/passenger/passenger_login_screen.dart';
+import '../features/passenger/passenger_register_screen.dart';
 import '../features/passenger/booking_screen.dart';
 import '../features/passenger/trip_history_screen.dart';
 import '../features/passenger/profile_screen.dart';
@@ -14,6 +16,8 @@ import '../features/map/live_map_screen.dart';
 
 // Operator Flow (Mutebi)
 import '../features/operator/operator_login_screen.dart';
+import '../features/operator/operator_register_screen.dart';
+import '../features/operator/operator_dashboard_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -26,6 +30,16 @@ final GoRouter appRouter = GoRouter(
     ),
 
     // Passenger Flow (Mable)
+    GoRoute(
+      path: '/passenger-login',
+      name: 'passenger-login',
+      builder: (context, state) => const PassengerLoginScreen(),
+    ),
+    GoRoute(
+      path: '/passenger-register',
+      name: 'passenger-register',
+      builder: (context, state) => const PassengerRegisterScreen(),
+    ),
     GoRoute(
       path: '/passenger-home',
       name: 'passenger-home',
@@ -59,6 +73,16 @@ final GoRouter appRouter = GoRouter(
       path: '/operator-login',
       name: 'operator-login',
       builder: (context, state) => const OperatorLoginScreen(),
+    ),
+    GoRoute(
+      path: '/operator-register',
+      name: 'operator-register',
+      builder: (context, state) => const OperatorRegisterScreen(),
+    ),
+    GoRoute(
+      path: '/operator-dashboard',
+      name: 'operator-dashboard',
+      builder: (context, state) => const OperatorDashboardScreen(),
     ),
   ],
 );

@@ -81,101 +81,117 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // --- 1. SECRET TAP LOGO (Now wrapped with GestureDetector) ---
-                GestureDetector(
-                  onTap: _handleLogoTap, // <-- The magic happens here!
-                  child: AnimatedBuilder(
-                    animation: _floatController,
-                    builder: (context, child) {
-                      return Transform.translate(
-                        offset: Offset(0, 8 * _floatController.value),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue.shade900.withValues(
-                                  alpha: 0.6,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxHeight < 600;
+              final logoSize = compact ? 100.0 : 140.0;
+              final horizontalPadding = constraints.maxWidth < 360
+                  ? 16.0
+                  : 28.0;
+
+              return SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // --- 1. SECRET TAP LOGO (Now wrapped with GestureDetector) ---
+                      GestureDetector(
+                        onTap: _handleLogoTap, // <-- The magic happens here!
+                        child: AnimatedBuilder(
+                          animation: _floatController,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: Offset(0, 8 * _floatController.value),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.blue.shade900.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                      blurRadius: 40,
+                                      spreadRadius: 10,
+                                    ),
+                                  ],
                                 ),
-                                blurRadius: 40,
-                                spreadRadius: 10,
+                                child: Image.asset(
+                                  'assets/images/bus_logo.png',
+                                  height: logoSize,
+                                  width: logoSize,
+                                ),
                               ),
-                            ],
-                          ),
-                          child: Image.asset(
-                            'assets/images/bus_logo.png',
-                            height: 140,
-                            width: 140,
-                          ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ),
+                      SizedBox(height: compact ? 16 : 24),
+
+                      // --- 2. App Title ---
+                      const Text(
+                            'Smart Ride UG',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 1.5,
+                            ),
+                          )
+                          .animate()
+                          .fade(duration: 600.ms)
+                          .slideY(begin: 0.2, end: 0),
+                      const SizedBox(height: 8),
+                      const Text(
+                            'Safe. Fast. Reliable.',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                              letterSpacing: 2,
+                            ),
+                          )
+                          .animate()
+                          .fade(duration: 600.ms, delay: 200.ms)
+                          .slideY(begin: 0.2, end: 0),
+                      SizedBox(height: compact ? 28 : 60),
+
+                      // --- 3. Glass-Morphism Cards ---
+                      _buildNavigationCard(
+                            context,
+                            icon: Icons.person_outline,
+                            title: 'Ride as Guest',
+                            subtitle: 'Browse and preview without booking',
+                            onTap: () => context.push('/passenger-home'),
+                            isPrimary: true,
+                          )
+                          .animate()
+                          .fade(duration: 600.ms, delay: 400.ms)
+                          .slideY(begin: 0.3, end: 0),
+
+                      const SizedBox(height: 16),
+
+                      _buildNavigationCard(
+                            context,
+                            icon: Icons.bookmark_border,
+                            title: 'Sign In',
+                            subtitle: 'Access your passenger account',
+                            onTap: () => context.push('/passenger-login'),
+                            isPrimary: false,
+                          )
+                          .animate()
+                          .fade(duration: 600.ms, delay: 600.ms)
+                          .slideY(begin: 0.3, end: 0),
+
+                      // --- 4. OPERATOR ACCESS IS COMPLETELY REMOVED FROM HERE ---
+                      // The visible "🔧 Staff Access" text is GONE.
+                      // Only the Secret Tap on the logo can open the Operator Portal.
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                // --- 2. App Title ---
-                const Text(
-                  'Smart Ride UG',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.5,
-                  ),
-                ).animate().fade(duration: 600.ms).slideY(begin: 0.2, end: 0),
-                const SizedBox(height: 8),
-                const Text(
-                      'Safe. Fast. Reliable.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        letterSpacing: 2,
-                      ),
-                    )
-                    .animate()
-                    .fade(duration: 600.ms, delay: 200.ms)
-                    .slideY(begin: 0.2, end: 0),
-                const SizedBox(height: 60),
-
-                // --- 3. Glass-Morphism Cards ---
-                _buildNavigationCard(
-                      context,
-                      icon: Icons.person_outline,
-                      title: 'Ride as Guest',
-                      subtitle: 'Find buses instantly, no sign-up',
-                      onTap: () => context.push('/passenger-home'),
-                      isPrimary: true,
-                    )
-                    .animate()
-                    .fade(duration: 600.ms, delay: 400.ms)
-                    .slideY(begin: 0.3, end: 0),
-
-                const SizedBox(height: 16),
-
-                _buildNavigationCard(
-                      context,
-                      icon: Icons.bookmark_border,
-                      title: 'Sign In',
-                      subtitle: 'Access saved routes & history',
-                      onTap: () => context.push('/profile'),
-                      isPrimary: false,
-                    )
-                    .animate()
-                    .fade(duration: 600.ms, delay: 600.ms)
-                    .slideY(begin: 0.3, end: 0),
-
-                // --- 4. OPERATOR ACCESS IS COMPLETELY REMOVED FROM HERE ---
-                // The visible "🔧 Staff Access" text is GONE.
-                // Only the Secret Tap on the logo can open the Operator Portal.
-                const SizedBox(height: 20),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
