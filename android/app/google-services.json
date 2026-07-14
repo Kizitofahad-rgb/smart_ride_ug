@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "665641038220",
+    "project_id": "smart-ride-ug-ad91a",
+    "storage_bucket": "smart-ride-ug-ad91a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:665641038220:android:a3335c81e4d8b26f4ee6a9",
+        "android_client_info": {
+          "package_name": "com.example.smart_ride_ug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD58wh4068RG5BA7Ed4-NeGPVfAuUe2L_k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
