@@ -180,6 +180,7 @@ class _OperatorDashboardScreenState extends State<OperatorDashboardScreen> {
               return Wrap(
                 spacing: 12,
                 runSpacing: 12,
+                // 🔥 FIXED: Added .toList() to convert Iterable to List
                 children: _stats
                     .map(
                       (item) => SizedBox(
@@ -206,7 +207,7 @@ class _OperatorDashboardScreenState extends State<OperatorDashboardScreen> {
                         ),
                       ),
                     )
-                    .toList(),
+                    .toList(), // 🔥 This is the fix!
               );
             },
           ),

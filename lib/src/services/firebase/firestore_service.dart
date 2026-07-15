@@ -18,7 +18,12 @@ class FirestoreService {
     return users.doc(uid).set(data);
   }
 
-  // --- Booking Methods (For Mable & Mutebi) ---
+  // 🔥 FIXED: Added the missing getUser method
+  Future<DocumentSnapshot> getUser(String uid) {
+    return users.doc(uid).get();
+  }
+
+  // --- Booking Methods ---
   Future<String> createBooking(Map<String, dynamic> data) {
     return bookings.add(data).then((doc) => doc.id);
   }
@@ -35,7 +40,7 @@ class FirestoreService {
     return bookings.doc(bookingId).update({'status': status});
   }
 
-  // --- Bus Methods (For Faisal) ---
+  // --- Bus Methods ---
   Stream<QuerySnapshot> getActiveBuses() {
     return buses.where('isActive', isEqualTo: true).snapshots();
   }
@@ -47,7 +52,7 @@ class FirestoreService {
     });
   }
 
-  // --- Trip Methods (For Mable) ---
+  // --- Trip Methods ---
   Stream<QuerySnapshot> getTripHistory(String userId) {
     return trips
         .where('userId', isEqualTo: userId)

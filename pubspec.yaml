@@ -17,11 +17,14 @@ dependencies:
   geolocator: ^14.0.3 # Driver GPS broadcast (real-time tracking)
   flutter_bloc: ^9.1.1 # State management (ADR-002)
   equatable: 2.1.0 # Value equality for BLoC events/states
+  flutter_local_notifications: ^18.0.0 # Local notifications
+  shared_preferences: ^2.5.0 # Persistent storage for user preferences
 
-  # --- FIREBASE DEPENDENCIES ---
-  firebase_core: ^4.12.0 # Firebase Core
-  firebase_auth: ^6.5.5 # Authentication
-  cloud_firestore: ^6.7.0 # Firestore Database
+  # --- FIREBASE DEPENDENCIES (Compatible Versions) ---
+  firebase_core: ^3.3.0 # Firebase Core
+  firebase_auth: ^5.3.0 # Authentication
+  cloud_firestore: ^5.4.0 # Firestore Database
+  firebase_messaging: ^15.2.10 # Push Notifications (compatible with firebase_core ^3.3.0)
 
 dev_dependencies:
   flutter_test:
@@ -39,7 +42,5 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/icon/Smartride.png"
-  # Android 8+ launchers otherwise place the legacy icon on a white plate.
-  # Define it as an adaptive icon with a matching navy background instead.
   adaptive_icon_background: "#0B2450"
   adaptive_icon_foreground: "assets/images/bus_logo.png"
