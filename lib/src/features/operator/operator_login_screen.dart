@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 import '../../widgets/primary_button.dart';
@@ -38,6 +39,9 @@ class _OperatorLoginScreenState extends State<OperatorLoginScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Login successful!')));
+        if (mounted) {
+          context.go('/operator-dashboard');
+        }
       }
     });
   }
@@ -113,9 +117,9 @@ class _OperatorLoginScreenState extends State<OperatorLoginScreen> {
               ),
               const SizedBox(height: 16),
               Center(
-                child: Text(
-                  'Don\'t have an account? Contact admin',
-                  style: AppTextStyles.caption,
+                child: TextButton(
+                  onPressed: () => context.go('/operator-register'),
+                  child: const Text('Don\'t have an account? Register now'),
                 ),
               ),
             ],

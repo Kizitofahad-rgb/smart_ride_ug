@@ -10,12 +10,18 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  go_router: ^17.3.0          # Navigation
-  flutter_animate: ^4.5.0     # Premium animations
-  flutter_map: ^8.3.1         # Map functionality (OpenStreetMap)
+  go_router: ^17.3.0 # Navigation
+  flutter_animate: ^4.5.0 # Premium animations
+  flutter_map: ^8.3.1 # Map functionality (OpenStreetMap)
   latlong2: ^0.10.1
-  flutter_bloc: ^9.1.1        # State management (ADR-002)
-  equatable: 2.1.0           # Value equality for BLoC events/states
+  geolocator: ^14.0.3 # Driver GPS broadcast (real-time tracking)
+  flutter_bloc: ^9.1.1 # State management (ADR-002)
+  equatable: 2.1.0 # Value equality for BLoC events/states
+
+  # --- FIREBASE DEPENDENCIES ---
+  firebase_core: ^4.12.0 # Firebase Core
+  firebase_auth: ^6.5.5 # Authentication
+  cloud_firestore: ^6.7.0 # Firestore Database
 
 dev_dependencies:
   flutter_test:
@@ -27,8 +33,13 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/bus_logo.png
+    - assets/icon/Smartride.png
 
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/images/bus_logo.png"
+  image_path: "assets/icon/Smartride.png"
+  # Android 8+ launchers otherwise place the legacy icon on a white plate.
+  # Define it as an adaptive icon with a matching navy background instead.
+  adaptive_icon_background: "#0B2450"
+  adaptive_icon_foreground: "assets/images/bus_logo.png"
