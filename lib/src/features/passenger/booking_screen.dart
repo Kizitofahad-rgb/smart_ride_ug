@@ -174,6 +174,10 @@ class _BookingScreenState extends State<BookingScreen> {
                           ),
                         ),
                       ),
+                      onPressed: _selectedSeat == null
+                          ? null
+                          : () => _handleBooking(context),
+                      child: const Text('Book', style: TextStyle(color: Colors.white)),
                     ),
                   );
                 },
