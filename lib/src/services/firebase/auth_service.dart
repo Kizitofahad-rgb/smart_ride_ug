@@ -103,6 +103,12 @@ class AuthService {
     }
   }
 
+  //method to AuthService class
+  Future<bool> isUserLoggedIn() async {
+    // Firebase Auth persists login automatically via token refresh
+    // Just check if currentUser is not null
+    return _auth.currentUser != null;
+  }
   // --- Helper Methods ---
 
   String _getAuthErrorMessage(String code) {
