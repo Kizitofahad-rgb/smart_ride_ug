@@ -7,27 +7,48 @@ import 'bloc/live_map_bloc.dart';
 import 'bloc/live_map_event.dart';
 import 'bloc/live_map_state.dart';
 import 'data/bus_location.dart';
+import 'data/stop.dart';
 import 'route_layer_manager.dart';
 
 /// Passenger-facing live map. Pass [busId] to track a specific bus; defaults
-/// to the single demo bus the driver screen broadcasts as, since the app
-/// doesn't have a bus-selection flow yet.
+/// to the single demo bus the driver screen broadcasts as, since guest
+/// browsing (no reservation yet) doesn't have a specific bus assigned.
+///
+/// [stops] renders the tappable stop layer for this route — pass the stops
+/// fetched for the reserved route so the passenger can still retarget their
+/// destination from the live view. [initialDestination] pre-selects a
+/// destination (typically the passenger's nearest stop right after
+/// reserving) so distance/ETA/arrival are live immediately.
 class LiveMapScreen extends StatelessWidget {
-  const LiveMapScreen({super.key, this.busId = 'bus-001'});
+  const LiveMapScreen({
+    super.key,
+    this.busId = 'bus-001',
+    this.stops,
+    this.initialDestination,
+  });
 
   final String busId;
+  final List<Stop>? stops;
+  final Stop? initialDestination;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => LiveMapBloc()..add(LiveMapStarted(busId)),
-      child: const _LiveMapView(),
+      create: (_) => LiveMapBloc()
+        ..add(LiveMapStarted(
+          busId,
+          initialDestinationName: initialDestination?.name,
+          initialDestinationPosition: initialDestination?.position,
+        )),
+      child: _LiveMapView(stops: stops ?? const []),
     );
   }
 }
 
 class _LiveMapView extends StatefulWidget {
-  const _LiveMapView();
+  const _LiveMapView({required this.stops});
+
+  final List<Stop> stops;
 
   @override
   State<_LiveMapView> createState() => _LiveMapViewState();
@@ -45,18 +66,12 @@ class _LiveMapViewState extends State<_LiveMapView> {
     _mapController.move(_mapController.camera.center, _currentZoom);
   }
 
-  void _onStationTap(String name) {
-    final station = RouteLayerManager.stations.firstWhere(
-      (s) => s["name"] == name,
-    );
+  void _onStopTap(Stop stop) {
     context.read<LiveMapBloc>().add(
-          LiveMapDestinationSelected(
-            name,
-            LatLng(station["lat"] as double, station["lng"] as double),
-          ),
-        );
+      LiveMapDestinationSelected(stop.name, stop.position),
+    );
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Destination set: $name')),
+      SnackBar(content: Text('Destination set: ${stop.name}')),
     );
   }
 
@@ -158,7 +173,7 @@ class _LiveMapViewState extends State<_LiveMapView> {
                 mapController: _mapController,
                 options: MapOptions(
                   initialCenter:
-                      state.busLocation?.position ?? _kampalaCenter,
+                  state.busLocation?.position ?? _kampalaCenter,
                   initialZoom: _currentZoom,
                   minZoom: 12.0,
                   maxZoom: 18.0,
@@ -169,16 +184,16 @@ class _LiveMapViewState extends State<_LiveMapView> {
                   // 'light_all' if you ever want the light basemap back.
                   TileLayer(
                     urlTemplate:
-                        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
                     subdomains: const ['a', 'b', 'c', 'd'],
                     userAgentPackageName: 'com.mhl.smart_ride_ug',
                     maxZoom: 20,
                   ),
-                  if (state.destination != null)
-                    RouteLayerManager.buildRoutePolylineLayer(),
-                  RouteLayerManager.buildStationMarkerLayer(
-                    onStationTap: _onStationTap,
-                  ),
+                  if (widget.stops.isNotEmpty)
+                    RouteLayerManager.buildStopMarkerLayer(
+                      stops: widget.stops,
+                      onStopTap: _onStopTap,
+                    ),
                   MarkerLayer(
                     markers: [
                       if (state.busLocation != null)
@@ -215,22 +230,22 @@ class _LiveMapViewState extends State<_LiveMapView> {
                   text: 'Waiting for the driver to start the trip…',
                 )
               else if (state.destinationName != null)
-                _TopBanner(
-                  icon: state.hasArrived
-                      ? Icons.check_circle
-                      : Icons.location_on,
-                  color: state.hasArrived
-                      ? const Color(0xFF166534)
-                      : const Color(0xFF1E293B),
-                  text: state.hasArrived
-                      ? 'Arrived at ${state.destinationName}'
-                      : 'To: ${state.destinationName}'
-                          '${state.distanceMeters != null ? '  •  ${_formatDistance(state.distanceMeters!)}' : ''}'
-                          '${state.eta != null ? '  •  ETA ${_formatDuration(state.eta!)}' : ''}',
-                  onClose: () => context
-                      .read<LiveMapBloc>()
-                      .add(const LiveMapDestinationCleared()),
-                ),
+                  _TopBanner(
+                    icon: state.hasArrived
+                        ? Icons.check_circle
+                        : Icons.location_on,
+                    color: state.hasArrived
+                        ? const Color(0xFF166534)
+                        : const Color(0xFF1E293B),
+                    text: state.hasArrived
+                        ? 'Arrived at ${state.destinationName}'
+                        : 'To: ${state.destinationName}'
+                        '${state.distanceMeters != null ? '  •  ${_formatDistance(state.distanceMeters!)}' : ''}'
+                        '${state.eta != null ? '  •  ETA ${_formatDuration(state.eta!)}' : ''}',
+                    onClose: () => context
+                        .read<LiveMapBloc>()
+                        .add(const LiveMapDestinationCleared()),
+                  ),
               Positioned(
                 bottom: 24.0,
                 right: 16.0,
@@ -370,8 +385,8 @@ class _StatusChip extends StatelessWidget {
     final color = isStale
         ? const Color(0xFF64748B)
         : status == BusTrackingStatus.active
-            ? const Color(0xFF10B981)
-            : const Color(0xFFF59E0B);
+        ? const Color(0xFF10B981)
+        : const Color(0xFFF59E0B);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

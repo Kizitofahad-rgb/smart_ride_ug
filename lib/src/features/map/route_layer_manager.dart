@@ -3,57 +3,39 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'data/bus_location.dart';
+import 'data/stop.dart';
 
 class RouteLayerManager {
-  // Kampala Central -> Wandegeya -> Makerere Main Gate -> CoCIS Complex.
-  static List<LatLng> getMainRouteCoordinates() {
-    return const [
-      LatLng(0.3136, 32.5811), // Kampala Central Node
-      LatLng(0.3220, 32.5760), // Wandegeya Intersection
-      LatLng(0.3292, 32.5711), // Makerere Main Gate Station
-      LatLng(0.3340, 32.5675), // CoCIS Complex Terminal
-    ];
-  }
-
-  static PolylineLayer buildRoutePolylineLayer() {
-    return PolylineLayer(
-      polylines: [
-        Polyline(
-          points: getMainRouteCoordinates(),
-          strokeWidth: 4,
-          color: const Color(0xFF38BDF8), // Bright accent blue, readable on dark tiles
-        ),
-      ],
-    );
-  }
-
-  /// The stations available for selection as a destination. Exposed as a
-  /// static list so the screen can look up a station's LatLng by name when
-  /// the user taps a marker.
-  static const List<Map<String, Object>> stations = [
-    {"name": "Wandegeya Stop", "lat": 0.3220, "lng": 32.5760},
-    {"name": "Makerere Gate Hub", "lat": 0.3292, "lng": 32.5711},
-  ];
-
-  static MarkerLayer buildStationMarkerLayer({
-    required void Function(String) onStationTap,
+  /// Renders a route's stops. Used two ways:
+  /// - [RouteDetailScreen]: no [onStopTap], [highlightedStopId] marks the
+  ///   passenger's nearest stop.
+  /// - [LiveMapScreen]: [onStopTap] lets the passenger tap a stop to set it
+  ///   as the destination for distance/ETA.
+  static MarkerLayer buildStopMarkerLayer({
+    required List<Stop> stops,
+    void Function(Stop)? onStopTap,
+    String? highlightedStopId,
   }) {
     return MarkerLayer(
-      markers: stations.map((station) {
-        final name = station["name"] as String;
+      markers: stops.map((stop) {
+        final isHighlighted = stop.id == highlightedStopId;
         return Marker(
-          point: LatLng(station["lat"] as double, station["lng"] as double),
-          width: 30,
-          height: 30,
+          point: stop.position,
+          width: isHighlighted ? 36 : 30,
+          height: isHighlighted ? 36 : 30,
           child: GestureDetector(
-            onTap: () => onStationTap(name),
+            onTap: onStopTap == null ? null : () => onStopTap(stop),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
+                color: isHighlighted
+                    ? const Color(0xFF2563EB)
+                    : const Color(0xFF1E293B),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFF94A3B8),
-                  width: 1.5,
+                  color: isHighlighted
+                      ? const Color(0xFF60A5FA)
+                      : const Color(0xFF94A3B8),
+                  width: isHighlighted ? 2.5 : 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -63,10 +45,10 @@ class RouteLayerManager {
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.directions_bus_filled,
-                color: Color(0xFFCBD5E1),
-                size: 16,
+                color: isHighlighted ? Colors.white : const Color(0xFFCBD5E1),
+                size: isHighlighted ? 18 : 16,
               ),
             ),
           ),
@@ -91,17 +73,41 @@ class RouteLayerManager {
     );
   }
 
+  /// The passenger's own live GPS position — a small blue dot, distinct from
+  /// both bus markers and stop markers so it can't be confused with either.
+  static Marker buildUserLocationMarker(LatLng position) {
+    return Marker(
+      point: position,
+      width: 22,
+      height: 22,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF38BDF8),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2.5),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF38BDF8).withValues(alpha: 0.6),
+              blurRadius: 8,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// The live bus marker. Color reflects [status]/[hasArrived] so the
   /// "arrival" state is visible on the map itself, not just in a banner:
   /// green = active & en route, amber = arrived, grey = stale/offline.
   /// Tap handling is left to the caller (wrap in a GestureDetector) so the
   /// marker itself stays a dumb, reusable piece of UI.
   static Marker buildBusMarker(
-    LatLng position, {
-    required BusTrackingStatus status,
-    required bool hasArrived,
-    VoidCallback? onTap,
-  }) {
+      LatLng position, {
+        required BusTrackingStatus status,
+        required bool hasArrived,
+        VoidCallback? onTap,
+      }) {
     final Color borderColor;
     if (status == BusTrackingStatus.offline) {
       borderColor = const Color(0xFF64748B); // grey — offline

@@ -10,13 +10,24 @@ abstract class LiveMapEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Starts (or restarts) watching a bus's Firestore document.
+/// Starts (or restarts) watching a bus's Firestore document. Pass
+/// [initialDestinationName]/[initialDestinationPosition] together when the
+/// passenger already picked a destination before opening the map (e.g. right
+/// after reserving a seat at their nearest stop) so distance/ETA/arrival
+/// are live from the first frame instead of waiting for a station tap.
 class LiveMapStarted extends LiveMapEvent {
   final String busId;
-  const LiveMapStarted(this.busId);
+  final String? initialDestinationName;
+  final LatLng? initialDestinationPosition;
+  const LiveMapStarted(
+      this.busId, {
+        this.initialDestinationName,
+        this.initialDestinationPosition,
+      });
 
   @override
-  List<Object?> get props => [busId];
+  List<Object?> get props =>
+      [busId, initialDestinationName, initialDestinationPosition];
 }
 
 /// Internal event fed by the Firestore stream subscription every time the
