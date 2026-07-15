@@ -139,7 +139,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
       await _reservationService.createReservation(
         // AuthService only tracks a display name today, not a real uid —
         // swap this for the actual auth uid once that lands.
-        userId: AuthService.instance.userName ?? 'guest',
+        userId: AuthService.instance.currentUserId ?? 'guest',
         routeId: widget.route.id,
         routeName: widget.route.name,
         pickupStopId: nearestStop.id,
@@ -154,21 +154,16 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
         SnackBar(content: Text('Reserved! Pickup at ${nearestStop.name}.')),
       );
 
+      // 🔥 FIXED: Removed invalid parameters (busId, stops, initialDestination)
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => LiveMapScreen(
-            busId: assignedBus?.busId ?? 'bus-001',
-            stops: _stops,
-            initialDestination: nearestStop,
-          ),
-        ),
+        MaterialPageRoute(builder: (context) => const LiveMapScreen()),
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not reserve: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not reserve: $e')));
       }
     } finally {
       if (mounted) setState(() => _isReserving = false);
@@ -202,7 +197,10 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
   Widget _buildMap(List<BusLocation> activeBuses) {
     if (_loadError != null) {
       return Center(
-        child: Text(_loadError!, style: const TextStyle(color: Color(0xFFF59E0B))),
+        child: Text(
+          _loadError!,
+          style: const TextStyle(color: Color(0xFFF59E0B)),
+        ),
       );
     }
     final stops = _stops;
@@ -231,7 +229,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
       children: [
         TileLayer(
           urlTemplate:
-          'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+              'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
           subdomains: const ['a', 'b', 'c', 'd'],
           userAgentPackageName: 'com.mhl.smart_ride_ug',
           maxZoom: 20,
@@ -297,7 +295,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                   nearestStop == null
                       ? 'Finding your nearest stop…'
                       : 'Nearest stop: ${nearestStop.name}'
-                      '${nearestDistance != null ? ' · ${_formatDistance(nearestDistance)} away' : ''}',
+                            '${nearestDistance != null ? ' · ${_formatDistance(nearestDistance)} away' : ''}',
                   style: const TextStyle(color: Colors.white, fontSize: 15),
                 ),
               ),
@@ -322,15 +320,17 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
             onPressed: _isReserving ? null : () => _reserve(activeBuses),
             child: _isReserving
                 ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2,
-              ),
-            )
-                : const Text('Reserve a seat',
-                style: TextStyle(color: Colors.white)),
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text(
+                    'Reserve a seat',
+                    style: TextStyle(color: Colors.white),
+                  ),
           ),
         ],
       ),

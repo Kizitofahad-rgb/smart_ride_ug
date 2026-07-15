@@ -39,7 +39,7 @@ class _PassengerRegisterScreenState extends State<PassengerRegisterScreen> {
     super.dispose();
   }
 
-  void _handleRegister() {
+  Future<void> _handleRegister() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -63,15 +63,25 @@ class _PassengerRegisterScreenState extends State<PassengerRegisterScreen> {
     }
 
     setState(() => _isLoading = true);
-    Future.delayed(const Duration(seconds: 2), () {
+
+    try {
+      await AuthService.instance.register(name, email, password);
       if (!mounted) return;
-      setState(() => _isLoading = false);
-      AuthService.instance.register(name, email);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Registration successful!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('✅ Registration successful!')),
+      );
       context.go('/passenger-home');
-    });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ ${e.toString().replaceFirst('Exception: ', '')}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    setState(() => _isLoading = false);
   }
 
   @override

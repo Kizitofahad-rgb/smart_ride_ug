@@ -10,6 +10,7 @@ import '../features/passenger/passenger_register_screen.dart';
 import '../features/passenger/booking_screen.dart';
 import '../features/passenger/trip_history_screen.dart';
 import '../features/passenger/profile_screen.dart';
+import '../features/passenger/notifications_screen.dart'; // ← ADD THIS
 
 // Map Flow (Faisal)
 import '../features/map/live_map_screen.dart';
@@ -60,6 +61,11 @@ final GoRouter appRouter = GoRouter(
       path: '/profile',
       name: 'profile',
       builder: (context, state) => const ProfileScreen(),
+    ),
+    GoRoute(
+      path: '/notifications', // ← ADD THIS
+      name: 'notifications',
+      builder: (context, state) => const NotificationsScreen(),
     ),
 
     // Map Flow (Faisal)

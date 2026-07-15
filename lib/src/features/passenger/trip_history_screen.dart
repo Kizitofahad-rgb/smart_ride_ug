@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/firebase/auth_service.dart';
+import '../../core/services/auth_service.dart';
 import '../../services/firebase/firestore_service.dart';
 
 class TripHistoryScreen extends StatelessWidget {
@@ -7,7 +7,7 @@ class TripHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userId = AuthService().currentUserId;
+    final userId = AuthService.instance.currentUserId;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -21,9 +21,21 @@ class TripHistoryScreen extends StatelessWidget {
       ),
       body: userId == null
           ? const Center(
-              child: Text(
-                'Please login to see your trips',
-                style: TextStyle(color: Colors.grey),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.lock_outline, color: Colors.grey, size: 48),
+                  SizedBox(height: 16),
+                  Text(
+                    'Please login to see your trips',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Sign in to view your booking history',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                ],
               ),
             )
           : StreamBuilder(
@@ -77,7 +89,6 @@ class TripHistoryScreen extends StatelessWidget {
                         trip['status'] == 'pending' ||
                         trip['status'] == 'approved';
                     final isCompleted = trip['status'] == 'completed';
-                    final isCancelled = trip['status'] == 'cancelled';
 
                     Color statusColor;
                     String statusLabel;

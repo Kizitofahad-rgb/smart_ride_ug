@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'data/bus_location.dart';
+import 'data/stop.dart';
 
 class RouteLayerManager {
   // Kampala Central -> Wandegeya -> Makerere Main Gate -> CoCIS Complex.
@@ -21,7 +22,9 @@ class RouteLayerManager {
         Polyline(
           points: getMainRouteCoordinates(),
           strokeWidth: 4,
-          color: const Color(0xFF38BDF8), // Bright accent blue, readable on dark tiles
+          color: const Color(
+            0xFF38BDF8,
+          ), // Bright accent blue, readable on dark tiles
         ),
       ],
     );
@@ -51,10 +54,7 @@ class RouteLayerManager {
               decoration: BoxDecoration(
                 color: const Color(0xFF1E293B),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFF94A3B8),
-                  width: 1.5,
-                ),
+                border: Border.all(color: const Color(0xFF94A3B8), width: 1.5),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.4),
@@ -75,6 +75,73 @@ class RouteLayerManager {
     );
   }
 
+  /// 🔥 FIXED: Added missing method for RouteDetailScreen
+  static MarkerLayer buildStopMarkerLayer({
+    required List<Stop> stops,
+    String? highlightedStopId,
+  }) {
+    return MarkerLayer(
+      markers: stops.map((stop) {
+        final isHighlighted = stop.id == highlightedStopId;
+        return Marker(
+          point: stop.position,
+          width: 32,
+          height: 32,
+          child: Container(
+            decoration: BoxDecoration(
+              color: isHighlighted
+                  ? const Color(0xFF2563EB)
+                  : const Color(0xFF1E293B),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isHighlighted
+                    ? const Color(0xFF60A5FA)
+                    : const Color(0xFF94A3B8),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                stop.name.substring(0, 1),
+                style: TextStyle(
+                  color: isHighlighted ? Colors.white : Colors.grey[400],
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  /// 🔥 FIXED: Added missing method for RouteDetailScreen
+  static Marker buildUserLocationMarker(LatLng position) {
+    return Marker(
+      point: position,
+      width: 30,
+      height: 30,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFF2563EB), width: 2),
+        ),
+        child: const Center(
+          child: Icon(Icons.circle, color: Color(0xFF2563EB), size: 12),
+        ),
+      ),
+    );
+  }
+
   /// A pin marker for the destination the passenger has selected. Only
   /// meant to be added to the map once a destination has been chosen.
   static Marker buildDestinationMarker(LatLng position) {
@@ -83,11 +150,7 @@ class RouteLayerManager {
       width: 36,
       height: 36,
       alignment: Alignment.topCenter,
-      child: const Icon(
-        Icons.location_on,
-        color: Color(0xFFEF4444),
-        size: 36,
-      ),
+      child: const Icon(Icons.location_on, color: Color(0xFFEF4444), size: 36),
     );
   }
 

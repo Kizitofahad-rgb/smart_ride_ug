@@ -20,7 +20,7 @@ import 'bus_location.dart';
 /// ```
 class BusTrackingRepository {
   BusTrackingRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
@@ -34,6 +34,18 @@ class BusTrackingRepository {
       final data = snapshot.data();
       if (!snapshot.exists || data == null) return null;
       return BusLocation.fromFirestore(snapshot.id, data);
+    });
+  }
+
+  /// 🔥 FIXED: Added missing method for RouteDetailScreen
+  Stream<List<BusLocation>> watchBusesForRoute(String routeId) {
+    return _buses.where('routeId', isEqualTo: routeId).snapshots().map((
+      snapshot,
+    ) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return BusLocation.fromFirestore(doc.id, data);
+      }).toList();
     });
   }
 
