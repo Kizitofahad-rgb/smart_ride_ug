@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/services/auth_service.dart';
+//import '../../core/services/auth_service.dart';
 import 'booking_confirmation_screen.dart';
 
 class BookingScreen extends StatefulWidget {
@@ -34,7 +34,7 @@ class _BookingScreenState extends State<BookingScreen> {
   String? _destinationLocation = 'Makerere University';
 
   void _handleBooking(BuildContext context) {
-    if (!AuthService.instance.isAuthenticated) {
+    if (false) {
       showDialog(
         context: context,
         builder: (context) {
