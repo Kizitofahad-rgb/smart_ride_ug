@@ -18,7 +18,6 @@ class FirestoreService {
     return users.doc(uid).set(data);
   }
 
-  // 🔥 FIXED: Added the missing getUser method
   Future<DocumentSnapshot> getUser(String uid) {
     return users.doc(uid).get();
   }
@@ -36,8 +35,21 @@ class FirestoreService {
     return bookings.where('status', isEqualTo: 'pending').snapshots();
   }
 
-  Future<void> updateBookingStatus(String bookingId, String status) {
-    return bookings.doc(bookingId).update({'status': status});
+  // 🔥 FIXED: Use Map<String, dynamic> with correct types
+  Future<void> updateBookingStatus(String bookingId, String status) async {
+    final Map<String, dynamic> data = {'status': status};
+    if (status == 'approved') {
+      data['approvedAt'] = FieldValue.serverTimestamp();
+    }
+    return bookings.doc(bookingId).update(data);
+  }
+
+  // 🔥 NEW: Smart confirm feature
+  Future<void> confirmBooking(String bookingId) {
+    return bookings.doc(bookingId).update({
+      'confirmed': true,
+      'status': 'confirmed',
+    });
   }
 
   // --- Bus Methods ---
@@ -56,7 +68,7 @@ class FirestoreService {
   Stream<QuerySnapshot> getTripHistory(String userId) {
     return trips
         .where('userId', isEqualTo: userId)
-        .orderBy('date', descending: true)
+        .orderBy('createdAt', descending: true)
         .snapshots();
   }
 

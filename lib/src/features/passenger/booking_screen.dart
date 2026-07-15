@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // ← ADD THIS
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/services/auth_service.dart';
 import '../../services/firebase/firestore_service.dart';
 
@@ -46,7 +46,9 @@ class _BookingScreenState extends State<BookingScreen> {
         'seat': _seats[_selectedSeat!],
         'seats': 1,
         'status': 'pending',
-        'createdAt': FieldValue.serverTimestamp(), // ← Now works
+        'confirmed':
+            false, // 🔥 SMART FEATURE: tracks if user confirmed the trip
+        'createdAt': FieldValue.serverTimestamp(),
       };
 
       await FirestoreService().createBooking(bookingData);
