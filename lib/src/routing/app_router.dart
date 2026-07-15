@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 // Home Screen
 import '../features/home/home_screen.dart';
 
-// Passenger Flow (Mable) - MAKE SURE THESE PATHS ARE CORRECT
+// Passenger Flow (Mable)
 import '../features/passenger/passenger_home_screen.dart';
 import '../features/passenger/booking_screen.dart';
-import '../features/passenger/trip_history_screen.dart'; // Notice: trip_history
+import '../features/passenger/trip_history_screen.dart';
 import '../features/passenger/profile_screen.dart';
 
 // Map Flow (Faisal)
@@ -39,8 +39,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/history',
       name: 'history',
-      builder: (context, state) =>
-          const TripHistoryScreen(), // FIXED: Matches class name
+      builder: (context, state) => const TripHistoryScreen(),
     ),
     GoRoute(
       path: '/profile',

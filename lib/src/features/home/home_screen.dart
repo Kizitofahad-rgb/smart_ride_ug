@@ -59,7 +59,9 @@ class _HomeScreenState extends State<HomeScreen>
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.shade900.withOpacity(0.6),
+                              color: Colors.blue.shade900.withValues(
+                                alpha: 0.6,
+                              ),
                               blurRadius: 40,
                               spreadRadius: 10,
                             ),
@@ -138,9 +140,11 @@ class _HomeScreenState extends State<HomeScreen>
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: const Text(
                       '🔧 Staff Access',
@@ -177,15 +181,15 @@ class _HomeScreenState extends State<HomeScreen>
         decoration: BoxDecoration(
           color: isPrimary
               ? const Color(0xFF2563EB) // Primary Blue
-              : Colors.white.withOpacity(0.05),
+              : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
           border: isPrimary
               ? null
-              : Border.all(color: Colors.white.withOpacity(0.1)),
+              : Border.all(color: Colors.white.withValues(alpha: 0.1)),
           boxShadow: isPrimary
               ? [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withOpacity(0.4),
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.4),
                     blurRadius: 20,
                     spreadRadius: 2,
                   ),
@@ -216,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen>
                     subtitle,
                     style: TextStyle(
                       color: isPrimary
-                          ? Colors.white.withOpacity(0.8)
+                          ? Colors.white.withValues(alpha: 0.8)
                           : Colors.grey.shade500,
                       fontSize: 13,
                     ),
