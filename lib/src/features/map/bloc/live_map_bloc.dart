@@ -26,26 +26,26 @@ class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
   StreamSubscription<BusLocation?>? _busSubscription;
 
   Future<void> _onStarted(
-    LiveMapStarted event,
-    Emitter<LiveMapState> emit,
-  ) async {
+      LiveMapStarted event,
+      Emitter<LiveMapState> emit,
+      ) async {
     emit(_buildState(
       isLoading: true,
       busLocation: state.busLocation,
-      destination: state.destination,
-      destinationName: state.destinationName,
+      destination: event.initialDestinationPosition ?? state.destination,
+      destinationName: event.initialDestinationName ?? state.destinationName,
     ));
 
     await _busSubscription?.cancel();
     _busSubscription = _repository.watchBus(event.busId).listen(
           (location) => add(LiveMapBusLocationChanged(location)),
-        );
+    );
   }
 
   void _onBusLocationChanged(
-    LiveMapBusLocationChanged event,
-    Emitter<LiveMapState> emit,
-  ) {
+      LiveMapBusLocationChanged event,
+      Emitter<LiveMapState> emit,
+      ) {
     emit(_buildState(
       isLoading: false,
       busLocation: event.location,
@@ -55,9 +55,9 @@ class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
   }
 
   void _onDestinationSelected(
-    LiveMapDestinationSelected event,
-    Emitter<LiveMapState> emit,
-  ) {
+      LiveMapDestinationSelected event,
+      Emitter<LiveMapState> emit,
+      ) {
     emit(_buildState(
       isLoading: state.isLoading,
       busLocation: state.busLocation,
@@ -67,9 +67,9 @@ class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
   }
 
   void _onDestinationCleared(
-    LiveMapDestinationCleared event,
-    Emitter<LiveMapState> emit,
-  ) {
+      LiveMapDestinationCleared event,
+      Emitter<LiveMapState> emit,
+      ) {
     emit(_buildState(
       isLoading: state.isLoading,
       busLocation: state.busLocation,

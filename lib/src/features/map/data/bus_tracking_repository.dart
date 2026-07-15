@@ -56,6 +56,23 @@ class BusTrackingRepository {
     }, SetOptions(merge: true));
   }
 
+  /// All buses currently broadcasting on a route — used by the route-detail
+  /// screen to show "2 buses active on this route" before the passenger
+  /// commits to tracking one of them.
+  Stream<List<BusLocation>> watchBusesForRoute(String routeId) {
+    return _buses
+        .where('routeId', isEqualTo: routeId)
+        .where('status', whereIn: [
+      BusTrackingStatus.active.name,
+      BusTrackingStatus.idle.name,
+    ])
+        .snapshots()
+        .map((snap) => snap.docs
+        .map((d) => BusLocation.fromFirestore(d.id, d.data()))
+        .where((bus) => !bus.isStale)
+        .toList());
+  }
+
   /// Marks the bus offline when the driver ends their trip, so passengers
   /// don't keep watching a stale marker on the map.
   Future<void> markOffline(String busId) {
