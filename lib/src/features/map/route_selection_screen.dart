@@ -118,7 +118,7 @@ class _RouteCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${route.stopIds.length} stops',
+                      '${route.stopIds.length} stops  •  ${route.formattedFare}  •  ${route.formattedHeadway}',
                       style: const TextStyle(color: Color(0xFF94A3B8)),
                     ),
                   ],
