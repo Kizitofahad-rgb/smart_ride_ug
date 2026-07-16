@@ -7,8 +7,10 @@ import 'bloc/live_map_bloc.dart';
 import 'bloc/live_map_event.dart';
 import 'bloc/live_map_state.dart';
 import 'data/bus_location.dart';
+import 'data/bus_route.dart';
 import 'data/stop.dart';
 import 'route_layer_manager.dart';
+import 'utils/latlng_tween.dart';
 
 /// Passenger-facing live map. Pass [busId] to track a specific bus; defaults
 /// to the single demo bus the driver screen broadcasts as, since guest
@@ -16,19 +18,23 @@ import 'route_layer_manager.dart';
 ///
 /// [stops] renders the tappable stop layer for this route — pass the stops
 /// fetched for the reserved route so the passenger can still retarget their
-/// destination from the live view. [initialDestination] pre-selects a
-/// destination (typically the passenger's nearest stop right after
-/// reserving) so distance/ETA/arrival are live immediately.
+/// destination from the live view. [route] draws the route polyline (falls
+/// back to straight lines between [stops] if the route has no curated
+/// polyline yet); pass it whenever it's available. [initialDestination]
+/// pre-selects a destination (typically the passenger's nearest stop right
+/// after reserving) so distance/ETA/arrival are live immediately.
 class LiveMapScreen extends StatelessWidget {
   const LiveMapScreen({
     super.key,
     this.busId = 'bus-001',
     this.stops,
+    this.route,
     this.initialDestination,
   });
 
   final String busId;
   final List<Stop>? stops;
+  final BusRoute? route;
   final Stop? initialDestination;
 
   @override
@@ -40,26 +46,82 @@ class LiveMapScreen extends StatelessWidget {
           initialDestinationName: initialDestination?.name,
           initialDestinationPosition: initialDestination?.position,
         )),
-      child: _LiveMapView(stops: stops ?? const []),
+      child: _LiveMapView(stops: stops ?? const [], route: route),
     );
   }
 }
 
 class _LiveMapView extends StatefulWidget {
-  const _LiveMapView({required this.stops});
+  const _LiveMapView({required this.stops, this.route});
 
   final List<Stop> stops;
+  final BusRoute? route;
 
   @override
   State<_LiveMapView> createState() => _LiveMapViewState();
 }
 
-class _LiveMapViewState extends State<_LiveMapView> {
+class _LiveMapViewState extends State<_LiveMapView>
+    with TickerProviderStateMixin {
   final MapController _mapController = MapController();
 
   static const LatLng _kampalaCenter = LatLng(0.3292, 32.5711);
+  static const Duration _glideDuration = Duration(milliseconds: 900);
+
   double _currentZoom = 15.0;
   bool _hasCenteredOnBus = false;
+
+  // Smoothly animate the bus marker between GPS/Firestore fixes instead of
+  // snapping to each new one — updates only arrive every few seconds, so
+  // without this the marker visibly jumps on every tick.
+  late final AnimationController _busMotion = AnimationController(
+    vsync: this,
+    duration: _glideDuration,
+  )..addListener(() => setState(() {}));
+  late final Animation<double> _busCurve =
+  CurvedAnimation(parent: _busMotion, curve: Curves.easeInOut);
+  LatLngTween? _busTween;
+  LatLng? _lastBusTarget;
+
+  // Same idea for the passenger's own live position.
+  late final AnimationController _userMotion = AnimationController(
+    vsync: this,
+    duration: _glideDuration,
+  )..addListener(() => setState(() {}));
+  late final Animation<double> _userCurve =
+  CurvedAnimation(parent: _userMotion, curve: Curves.easeInOut);
+  LatLngTween? _userTween;
+  LatLng? _lastUserTarget;
+
+  @override
+  void dispose() {
+    _busMotion.dispose();
+    _userMotion.dispose();
+    _mapController.dispose();
+    super.dispose();
+  }
+
+  void _animateBusTo(LatLng target) {
+    if (_lastBusTarget == target) return;
+    final start = _displayedBusPosition ?? target;
+    _busTween = LatLngTween(begin: start, end: target);
+    _lastBusTarget = target;
+    _busMotion.forward(from: 0);
+  }
+
+  void _animateUserTo(LatLng target) {
+    if (_lastUserTarget == target) return;
+    final start = _displayedUserPosition ?? target;
+    _userTween = LatLngTween(begin: start, end: target);
+    _lastUserTarget = target;
+    _userMotion.forward(from: 0);
+  }
+
+  LatLng? get _displayedBusPosition =>
+      _busTween?.evaluate(_busCurve) ?? _lastBusTarget;
+
+  LatLng? get _displayedUserPosition =>
+      _userTween?.evaluate(_userCurve) ?? _lastUserTarget;
 
   void _zoomBy(double delta) {
     _currentZoom = (_currentZoom + delta).clamp(12.0, 18.0);
@@ -152,6 +214,13 @@ class _LiveMapViewState extends State<_LiveMapView> {
       backgroundColor: const Color(0xFF0A0E1A),
       body: BlocConsumer<LiveMapBloc, LiveMapState>(
         listener: (context, state) {
+          if (state.busLocation != null) {
+            _animateBusTo(state.busLocation!.position);
+          }
+          if (state.userPosition != null) {
+            _animateUserTo(state.userPosition!);
+          }
+
           // Auto-center the camera on the bus the first time it appears.
           if (!_hasCenteredOnBus && state.busLocation != null) {
             _hasCenteredOnBus = true;
@@ -167,13 +236,16 @@ class _LiveMapViewState extends State<_LiveMapView> {
           }
         },
         builder: (context, state) {
+          final busPosition = _displayedBusPosition ?? state.busLocation?.position;
+          final userPosition = _displayedUserPosition ?? state.userPosition;
+          final route = widget.route;
+
           return Stack(
             children: [
               FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
-                  initialCenter:
-                  state.busLocation?.position ?? _kampalaCenter,
+                  initialCenter: busPosition ?? _kampalaCenter,
                   initialZoom: _currentZoom,
                   minZoom: 12.0,
                   maxZoom: 18.0,
@@ -189,6 +261,16 @@ class _LiveMapViewState extends State<_LiveMapView> {
                     userAgentPackageName: 'com.mhl.smart_ride_ug',
                     maxZoom: 20,
                   ),
+                  if (route != null &&
+                      (route.polyline.length > 1 || widget.stops.length > 1))
+                    PolylineLayer(
+                      polylines: [
+                        RouteLayerManager.buildRoutePolyline(
+                          route,
+                          fallbackStops: widget.stops,
+                        ),
+                      ],
+                    ),
                   if (widget.stops.isNotEmpty)
                     RouteLayerManager.buildStopMarkerLayer(
                       stops: widget.stops,
@@ -196,13 +278,15 @@ class _LiveMapViewState extends State<_LiveMapView> {
                     ),
                   MarkerLayer(
                     markers: [
-                      if (state.busLocation != null)
+                      if (busPosition != null)
                         RouteLayerManager.buildBusMarker(
-                          state.busLocation!.position,
+                          busPosition,
                           status: state.busLocation!.status,
                           hasArrived: state.hasArrived,
                           onTap: () => _showBusDetails(state.busLocation!, state),
                         ),
+                      if (userPosition != null)
+                        RouteLayerManager.buildUserLocationMarker(userPosition),
                       if (state.destination != null)
                         RouteLayerManager.buildDestinationMarker(
                           state.destination!,

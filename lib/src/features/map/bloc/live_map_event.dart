@@ -54,3 +54,14 @@ class LiveMapDestinationSelected extends LiveMapEvent {
 class LiveMapDestinationCleared extends LiveMapEvent {
   const LiveMapDestinationCleared();
 }
+
+/// Internal event fed by the device GPS stream every time the passenger's
+/// own position changes. Powers the live "you are here" dot, independent
+/// of the bus's position.
+class LiveMapUserLocationChanged extends LiveMapEvent {
+  final LatLng position;
+  const LiveMapUserLocationChanged(this.position);
+
+  @override
+  List<Object?> get props => [position];
+}

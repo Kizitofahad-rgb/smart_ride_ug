@@ -160,6 +160,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
           builder: (context) => LiveMapScreen(
             busId: assignedBus?.busId ?? 'bus-001',
             stops: _stops,
+            route: widget.route,
             initialDestination: nearestStop,
           ),
         ),

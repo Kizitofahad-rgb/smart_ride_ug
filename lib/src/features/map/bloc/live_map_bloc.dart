@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/services/location_service.dart';
 import '../data/bus_location.dart';
 import '../data/bus_tracking_repository.dart';
 import 'live_map_event.dart';
@@ -13,17 +15,21 @@ import 'live_map_state.dart';
 const double kArrivalRadiusMeters = 80;
 
 class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
-  LiveMapBloc({BusTrackingRepository? repository})
+  LiveMapBloc({BusTrackingRepository? repository, LocationService? locationService})
       : _repository = repository ?? BusTrackingRepository(),
+        _locationService = locationService ?? LocationService.instance,
         super(const LiveMapState()) {
     on<LiveMapStarted>(_onStarted);
     on<LiveMapBusLocationChanged>(_onBusLocationChanged);
     on<LiveMapDestinationSelected>(_onDestinationSelected);
     on<LiveMapDestinationCleared>(_onDestinationCleared);
+    on<LiveMapUserLocationChanged>(_onUserLocationChanged);
   }
 
   final BusTrackingRepository _repository;
+  final LocationService _locationService;
   StreamSubscription<BusLocation?>? _busSubscription;
+  StreamSubscription<Position>? _userSubscription;
 
   Future<void> _onStarted(
       LiveMapStarted event,
@@ -34,12 +40,25 @@ class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
       busLocation: state.busLocation,
       destination: event.initialDestinationPosition ?? state.destination,
       destinationName: event.initialDestinationName ?? state.destinationName,
+      userPosition: state.userPosition,
     ));
 
     await _busSubscription?.cancel();
     _busSubscription = _repository.watchBus(event.busId).listen(
           (location) => add(LiveMapBusLocationChanged(location)),
     );
+
+    // Best-effort: if the passenger has denied location permission, the
+    // map still works fine, it just won't show their own live dot.
+    await _userSubscription?.cancel();
+    final granted = await _locationService.ensurePermission();
+    if (granted) {
+      _userSubscription = _locationService.watchPosition().listen(
+            (position) => add(
+          LiveMapUserLocationChanged(LatLng(position.latitude, position.longitude)),
+        ),
+      );
+    }
   }
 
   void _onBusLocationChanged(
@@ -51,6 +70,7 @@ class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
       busLocation: event.location,
       destination: state.destination,
       destinationName: state.destinationName,
+      userPosition: state.userPosition,
     ));
   }
 
@@ -63,6 +83,7 @@ class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
       busLocation: state.busLocation,
       destination: event.position,
       destinationName: event.name,
+      userPosition: state.userPosition,
     ));
   }
 
@@ -75,6 +96,20 @@ class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
       busLocation: state.busLocation,
       destination: null,
       destinationName: null,
+      userPosition: state.userPosition,
+    ));
+  }
+
+  void _onUserLocationChanged(
+      LiveMapUserLocationChanged event,
+      Emitter<LiveMapState> emit,
+      ) {
+    emit(_buildState(
+      isLoading: state.isLoading,
+      busLocation: state.busLocation,
+      destination: state.destination,
+      destinationName: state.destinationName,
+      userPosition: event.position,
     ));
   }
 
@@ -86,6 +121,7 @@ class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
     required BusLocation? busLocation,
     required LatLng? destination,
     required String? destinationName,
+    required LatLng? userPosition,
   }) {
     double? distance;
     Duration? eta;
@@ -105,6 +141,7 @@ class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
       busLocation: busLocation,
       destination: destination,
       destinationName: destinationName,
+      userPosition: userPosition,
       distanceMeters: distance,
       eta: eta,
       hasArrived: arrived,
@@ -114,6 +151,7 @@ class LiveMapBloc extends Bloc<LiveMapEvent, LiveMapState> {
   @override
   Future<void> close() {
     _busSubscription?.cancel();
+    _userSubscription?.cancel();
     return super.close();
   }
 }
