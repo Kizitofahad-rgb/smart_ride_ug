@@ -13,6 +13,7 @@ import '../features/passenger/profile_screen.dart';
 
 // Map Flow (Faisal)
 import '../features/map/live_map_screen.dart';
+import '../features/map/driver/driver_broadcast_screen.dart';
 
 // Operator Flow (Mutebi)
 import '../features/operator/operator_login_screen.dart';
@@ -66,6 +67,11 @@ final GoRouter appRouter = GoRouter(
       path: '/live-map',
       name: 'live-map',
       builder: (context, state) => const LiveMapScreen(),
+    ),
+    GoRoute(
+      path: '/driver',
+      name: 'driver',
+      builder: (context, state) => const DriverBroadcastScreen(),
     ),
 
     // Operator Flow (Mutebi)
