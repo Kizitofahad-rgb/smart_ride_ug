@@ -46,12 +46,24 @@ class _BookingScreenState extends State<BookingScreen> {
         'seat': _seats[_selectedSeat!],
         'seats': 1,
         'status': 'pending',
-        'confirmed':
-            false, // 🔥 SMART FEATURE: tracks if user confirmed the trip
+        'confirmed': false,
         'createdAt': FieldValue.serverTimestamp(),
       };
 
-      await FirestoreService().createBooking(bookingData);
+      // 1. Save to bookings collection
+      final bookingId = await FirestoreService().createBooking(bookingData);
+
+      // 2. 🔥 FIX: Also save to trips collection so Trip History works
+      await FirebaseFirestore.instance.collection('trips').add({
+        'userId': userId,
+        'bookingId': bookingId,
+        'pickup': 'Old Taxi Park',
+        'destination': 'Makerere University',
+        'seat': _seats[_selectedSeat!],
+        'seats': 1,
+        'status': 'pending',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
