@@ -8,8 +8,30 @@ import '../widgets/bus_marker_widget.dart';
 import '../widgets/stop_marker_widget.dart';
 import 'bus_popup_widget.dart';
 
+/// [busId] / [routeName] identify which simulated bus/route to show —
+/// defaults to the generic demo bus when opened directly (e.g. from the
+/// passenger home tab). [initialPosition] / [destinationName] come from a
+/// completed reservation (see route_detail_screen.dart) so the map opens
+/// centered on the passenger's pickup stop instead of the demo default.
+///
+/// NOTE: this screen still drives its bus marker from [BusSimulationService]
+/// (a local fake, not Firestore) regardless of which bus/route is passed in
+/// — the reservation flow's real-time bus data (via BusTrackingRepository)
+/// isn't wired into this screen yet. Passing a real busId only affects the
+/// label shown, not which bus is actually simulated.
 class LiveMapScreen extends StatefulWidget {
-  const LiveMapScreen({super.key});
+  const LiveMapScreen({
+    super.key,
+    this.busId = 'BUS-001',
+    this.routeName = 'Route 4A - Kampala Loop',
+    this.initialPosition,
+    this.destinationName,
+  });
+
+  final String busId;
+  final String routeName;
+  final LatLng? initialPosition;
+  final String? destinationName;
 
   @override
   State<LiveMapScreen> createState() => _LiveMapScreenState();
@@ -18,7 +40,8 @@ class LiveMapScreen extends StatefulWidget {
 class _LiveMapScreenState extends State<LiveMapScreen> {
   final MapController _mapController = MapController();
   final BusSimulationService _simulationService = BusSimulationService();
-  LatLng _currentPosition = const LatLng(0.3136, 32.5811);
+  late LatLng _currentPosition =
+      widget.initialPosition ?? const LatLng(0.3136, 32.5811);
   bool _isFollowingBus = true;
 
   static const List<LatLng> _routePoints = [
@@ -76,9 +99,11 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
-        title: const Text(
-          'Live Bus Tracking',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          widget.destinationName != null
+              ? 'Live Bus Tracking · to ${widget.destinationName}'
+              : 'Live Bus Tracking',
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF1E293B),
         elevation: 0,
@@ -94,8 +119,8 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
       ),
       body: StreamBuilder<BusModel>(
         stream: _simulationService.simulateBusMovement(
-          'BUS-001',
-          'Route 4A - Kampala Loop',
+          widget.busId,
+          widget.routeName,
         ),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -127,7 +152,7 @@ class _LiveMapScreenState extends State<LiveMapScreen> {
                 children: [
                   TileLayer(
                     urlTemplate:
-                        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
                     subdomains: const ['a', 'b', 'c', 'd'],
                     userAgentPackageName: 'com.mhl.smart_ride_ug',
                   ),
