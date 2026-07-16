@@ -3,9 +3,30 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'data/bus_location.dart';
+import 'data/bus_route.dart';
 import 'data/stop.dart';
 
 class RouteLayerManager {
+  /// The route line itself. Prefers the route's own [BusRoute.polyline]
+  /// (denser, road-following points); falls back to straight lines between
+  /// [fallbackStops] when a route hasn't had a polyline curated for it yet.
+  static Polyline buildRoutePolyline(
+      BusRoute route, {
+        List<Stop> fallbackStops = const [],
+      }) {
+    final points = route.polyline.isNotEmpty
+        ? route.polyline
+        : fallbackStops.map((s) => s.position).toList(growable: false);
+
+    return Polyline(
+      points: points,
+      color: Color(route.colorValue).withValues(alpha: 0.85),
+      strokeWidth: 4,
+      borderColor: Colors.black.withValues(alpha: 0.25),
+      borderStrokeWidth: 1,
+    );
+  }
+
   /// Renders a route's stops. Used two ways:
   /// - [RouteDetailScreen]: no [onStopTap], [highlightedStopId] marks the
   ///   passenger's nearest stop.

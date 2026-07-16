@@ -14,6 +14,11 @@ class LiveMapState extends Equatable {
   final LatLng? destination;
   final String? destinationName;
 
+  /// The passenger's own live GPS position. Null until a fix comes in or
+  /// if they've denied location permission — the map still works without
+  /// it, it just won't show the "you are here" dot.
+  final LatLng? userPosition;
+
   /// Straight-line distance from the bus to [destination], in meters.
   /// Null whenever either the bus or the destination is unknown.
   final double? distanceMeters;
@@ -29,6 +34,7 @@ class LiveMapState extends Equatable {
     this.busLocation,
     this.destination,
     this.destinationName,
+    this.userPosition,
     this.distanceMeters,
     this.eta,
     this.hasArrived = false,
@@ -36,12 +42,13 @@ class LiveMapState extends Equatable {
 
   @override
   List<Object?> get props => [
-        isLoading,
-        busLocation,
-        destination,
-        destinationName,
-        distanceMeters,
-        eta,
-        hasArrived,
-      ];
+    isLoading,
+    busLocation,
+    destination,
+    destinationName,
+    userPosition,
+    distanceMeters,
+    eta,
+    hasArrived,
+  ];
 }
