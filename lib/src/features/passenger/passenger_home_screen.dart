@@ -8,7 +8,7 @@ import 'booking_screen.dart';
 import 'trip_history_screen.dart';
 import 'profile_screen.dart';
 import 'notifications_screen.dart';
-import '../map/live_map_screen.dart';
+import '../map/presentation/live_map_screen.dart';
 import '../../services/firebase/firestore_service.dart';
 
 class PassengerHomeScreen extends StatefulWidget {
@@ -56,11 +56,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
   }
 }
 
-// ============================================================
-// 🔥 SMART CONFIRM FEATURE: The banner appears when a booking
-//    is approved but not yet confirmed by the passenger.
-//    Auto-cancels after 5 minutes.
-// ============================================================
 class _HomeContent extends StatelessWidget {
   const _HomeContent();
 
@@ -86,7 +81,7 @@ class _HomeContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // 🔥 SMART CONFIRM BANNER
+          // SMART CONFIRM BANNER
           if (userId != null)
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -104,14 +99,12 @@ class _HomeContent extends StatelessWidget {
                 final data = booking.data() as Map<String, dynamic>;
                 final bookingId = booking.id;
 
-                // Auto-cancel after 5 minutes if not confirmed
                 final approvedAt = data['approvedAt']?.toDate();
                 if (approvedAt != null) {
                   final elapsed = DateTime.now()
                       .difference(approvedAt)
                       .inMinutes;
                   if (elapsed >= 5) {
-                    // Auto-cancel the booking
                     FirebaseFirestore.instance
                         .collection('bookings')
                         .doc(bookingId)
@@ -303,6 +296,7 @@ class _HomeContent extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
+                  // 🔥 FIX: Book Seat button now uses BookingScreen constructor with default bus data
                   onPressed: () {
                     if (!AuthService.instance.isAuthenticated) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -318,7 +312,12 @@ class _HomeContent extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const BookingScreen(),
+                        builder: (context) => const BookingScreen(
+                          busId: 'BUS-001',
+                          routeName: 'Route 4A - Kampala Loop',
+                          availableSeats: 40,
+                          eta: '~5 min',
+                        ),
                       ),
                     );
                   },
