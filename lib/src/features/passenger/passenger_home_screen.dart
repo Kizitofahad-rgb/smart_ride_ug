@@ -141,6 +141,12 @@ class PassengerHomeScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LiveMapScreen(),
+                  ),
+                );
                 // Add your Find My Bus navigation or action here
               },
               child: const Text(
