@@ -10,10 +10,11 @@ import '../features/passenger/passenger_register_screen.dart';
 import '../features/passenger/booking_screen.dart';
 import '../features/passenger/trip_history_screen.dart';
 import '../features/passenger/profile_screen.dart';
+import '../features/passenger/notifications_screen.dart';
 
 // Map Flow (Faisal)
-import '../features/map/live_map_screen.dart';
-import '../features/map/driver/driver_broadcast_screen.dart';
+import '../features/map/presentation/live_map_screen.dart'; // 🔥 FIX: Updated path
+// 🔥 FIX: Removed driver_broadcast_screen import (it doesn't exist)
 
 // Operator Flow (Mutebi)
 import '../features/operator/operator_login_screen.dart';
@@ -61,6 +62,11 @@ final GoRouter appRouter = GoRouter(
       name: 'profile',
       builder: (context, state) => const ProfileScreen(),
     ),
+    GoRoute(
+      path: '/notifications',
+      name: 'notifications',
+      builder: (context, state) => const NotificationsScreen(),
+    ),
 
     // Map Flow (Faisal)
     GoRoute(
@@ -68,11 +74,7 @@ final GoRouter appRouter = GoRouter(
       name: 'live-map',
       builder: (context, state) => const LiveMapScreen(),
     ),
-    GoRoute(
-      path: '/driver',
-      name: 'driver',
-      builder: (context, state) => const DriverBroadcastScreen(),
-    ),
+    // 🔥 FIX: Removed '/driver' route
 
     // Operator Flow (Mutebi)
     GoRoute(

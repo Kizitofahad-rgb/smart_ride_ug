@@ -32,17 +32,37 @@ class _PassengerLoginScreenState extends State<PassengerLoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
-    Future.delayed(const Duration(seconds: 2), () {
+
+    try {
+      await AuthService.instance.signIn(email, password);
       if (!mounted) return;
-      setState(() => _isLoading = false);
-      AuthService.instance.signIn(_emailController.text.trim());
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Login successful!')));
+      ).showSnackBar(const SnackBar(content: Text('✅ Login successful!')));
       context.go('/passenger-home');
-    });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ ${e.toString().replaceFirst('Exception: ', '')}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    setState(() => _isLoading = false);
   }
 
   @override
